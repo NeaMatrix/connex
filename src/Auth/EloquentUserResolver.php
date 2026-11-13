@@ -6,6 +6,7 @@ namespace NeaMatrix\Connex\Auth;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use LogicException;
@@ -48,7 +49,14 @@ class EloquentUserResolver implements ResolvesUsers
             $attributes[$this->passwordColumn] = Hash::make(Str::random(40));
         }
 
-        $user->forceFill($attributes)->save();
+        try {
+            $user->forceFill($attributes)->save();
+        } catch (UniqueConstraintViolationException $exception) {
+            // A parallel confirmation created the same user first: use that one.
+            $existing = $user->newQuery()->where($this->column, $phone)->first();
+
+            return $existing instanceof Authenticatable ? $existing : throw $exception;
+        }
 
         return $user;
     }

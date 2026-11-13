@@ -17,4 +17,5 @@ return [
     'no_code' => 'Didn\'t receive the verification code?',
     'change_number' => 'Change number',
     'retry' => 'Try again',
+    'cancel' => 'Cancel',
 ];

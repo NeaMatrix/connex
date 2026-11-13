@@ -19,7 +19,7 @@ use NeaMatrix\Connex\Exceptions\ExceptionFactory;
  */
 class Transport
 {
-    /** Fields that must never reach the logs. */
+    /** Fields that must never reach the logs; the msisdn is masked. */
     private const array SECRET_FIELDS = ['otp', 'password', 'otp_signature'];
 
     public function __construct(
@@ -85,8 +85,15 @@ class Transport
             return;
         }
 
+        $request = array_diff_key($parameters, array_flip(self::SECRET_FIELDS));
+
+        if (isset($request['msisdn'])) {
+            $msisdn = (string) $request['msisdn'];
+            $request['msisdn'] = substr($msisdn, 0, 5).str_repeat('*', max(strlen($msisdn) - 7, 0)).substr($msisdn, -2);
+        }
+
         $this->logs->channel($this->options->logChannel)->info("Connex {$endpoint->value}", [
-            'request' => array_diff_key($parameters, array_flip(self::SECRET_FIELDS)),
+            'request' => $request,
             'http_status' => $response->httpStatus,
             'message_code' => $response->rawCode,
             'message' => $response->message(),

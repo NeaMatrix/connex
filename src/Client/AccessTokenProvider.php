@@ -55,7 +55,7 @@ class AccessTokenProvider
      */
     private function requestToken(): array
     {
-        if ($this->options->email === '' || $this->options->password === '') {
+        if ($this->options->baseUrl === '' || $this->options->email === '' || $this->options->password === '') {
             throw AuthenticationFailed::missingCredentials();
         }
 

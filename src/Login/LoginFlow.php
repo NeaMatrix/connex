@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace NeaMatrix\Connex\Login;
 
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\ConnectionInterface;
 use NeaMatrix\Connex\Contracts\ConnexClient;
 use NeaMatrix\Connex\Contracts\ResolvesUsers;
 use NeaMatrix\Connex\Data\OtpChallenge;
@@ -27,6 +27,7 @@ class LoginFlow
         private readonly SubscriptionStore $subscriptions,
         private readonly ResolvesUsers $users,
         private readonly Dispatcher $events,
+        private readonly ConnectionInterface $database,
         private readonly bool $storesSubscriptions = true,
     ) {}
 
@@ -61,9 +62,12 @@ class LoginFlow
     }
 
     /**
+     * Confirm the OTP with Connex, then find or create the user and store the
+     * subscription in one transaction.
+     *
      * @throws ConnexException|LoginExpired
      */
-    public function confirmOtp(LoginSession $session, string $otp): Authenticatable
+    public function confirmOtp(LoginSession $session, string $otp): LoginResult
     {
         $msisdn = $this->msisdns->normalize($session->msisdn() ?? throw LoginExpired::missing('phone number'));
 
@@ -75,15 +79,17 @@ class LoginFlow
             $session->trackingId(),
         );
 
-        $user = $this->users->resolve($msisdn, $confirmation);
-        $subscription = null;
+        $result = $this->database->transaction(function () use ($msisdn, $confirmation): LoginResult {
+            $user = $this->users->resolve($msisdn, $confirmation);
+            $subscription = $this->storesSubscriptions
+                ? $this->subscriptions->attachOwner($this->subscriptions->recordLogin($confirmation), $user)
+                : null;
 
-        if ($this->storesSubscriptions) {
-            $subscription = $this->subscriptions->attachOwner($this->subscriptions->recordLogin($confirmation), $user);
-        }
+            return new LoginResult($user, $confirmation, $subscription);
+        });
 
-        $this->events->dispatch(new SubscriberLoggedIn($user, $confirmation, $session->device(), $subscription));
+        $this->events->dispatch(new SubscriberLoggedIn($result->user, $result->confirmation, $session->device(), $result->subscription));
 
-        return $user;
+        return $result;
     }
 }

@@ -4,46 +4,72 @@ declare(strict_types=1);
 
 namespace NeaMatrix\Connex\Auth;
 
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use Illuminate\Http\Request;
-use LogicException;
 use NeaMatrix\Connex\Contracts\LoginResponder;
+use NeaMatrix\Connex\Login\Clients\AuthorizationRequest;
+use NeaMatrix\Connex\Login\LoginRedirect;
+use NeaMatrix\Connex\Login\LoginResult;
 use NeaMatrix\Connex\Login\LoginSession;
 
 /**
- * Web: logs the user into the session guard and returns the intended URL.
- * App webview (device=android|ios): returns the app callback URL with a
- * single-use handoff code, which the app exchanges for an API token.
+ * With a client (mobile app, web frontend): returns to its redirect_uri with a
+ * single-use ?code= that the client exchanges for a token at POST /connex/api/token.
+ *
+ * Without a client: signs the visitor into the session guard and returns the
+ * intended URL, for frontends served from this same app.
  */
 class DefaultLoginResponder implements LoginResponder
 {
+    public const string CODE_PURPOSE = 'login-code';
+
     public function __construct(
         private readonly AuthFactory $auth,
-        private readonly HandoffCodes $handoffCodes,
+        private readonly OneTimeCodes $codes,
+        private readonly int $codeTtl,
         private readonly ?string $guard,
         private readonly string $redirectTo,
-        private readonly ?string $mobileCallbackUrl,
     ) {}
 
-    public function respond(Request $request, Authenticatable $user, LoginSession $session): string
+    public function respond(Request $request, LoginResult $result, LoginSession $session): LoginRedirect
     {
-        $device = $session->device();
+        $authorization = $session->authorization();
 
-        if ($device->isMobile()) {
-            if ($this->mobileCallbackUrl === null) {
-                throw new LogicException('Set CONNEX_MOBILE_CALLBACK_URL to log in from the mobile app.');
-            }
+        return $authorization === null
+            ? $this->sessionLogin($request, $result)
+            : $this->codeFor($authorization, $result, $session);
+    }
 
-            $code = $this->handoffCodes->issue($user->getAuthIdentifier(), $device);
-            $separator = str_contains($this->mobileCallbackUrl, '?') ? '&' : '?';
+    private function codeFor(AuthorizationRequest $authorization, LoginResult $result, LoginSession $session): LoginRedirect
+    {
+        $grant = new LoginGrant(
+            userId: $result->user->getKey(),
+            clientId: $authorization->clientId,
+            redirectUri: $authorization->redirectUri,
+            device: $session->device(),
+            isNewSubscriber: $result->confirmation->isNewSubscriber(),
+            codeChallenge: $authorization->codeChallenge,
+        );
 
-            return $this->mobileCallbackUrl.$separator.http_build_query(['code' => $code]);
+        $code = $this->codes->issue(self::CODE_PURPOSE, $grant->toArray(), $this->codeTtl);
+        $url = $authorization->redirectWith(['code' => $code]);
+
+        if ($authorization->responseMode !== AuthorizationRequest::RESPONSE_WEB_MESSAGE) {
+            return new LoginRedirect($url);
         }
 
-        $this->auth->guard($this->guard)->login($user, remember: true);
+        return new LoginRedirect(
+            $url,
+            ['type' => 'connex:login', 'code' => $code, 'state' => $authorization->state],
+            $authorization->targetOrigin(),
+        );
+    }
+
+    private function sessionLogin(Request $request, LoginResult $result): LoginRedirect
+    {
+        $this->auth->guard($this->guard)->login($result->user, remember: true);
         $request->session()->regenerate();
 
-        return (string) $request->session()->pull('url.intended', $this->redirectTo);
+        return new LoginRedirect((string) $request->session()->pull('url.intended', $this->redirectTo));
     }
 }

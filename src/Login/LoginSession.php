@@ -7,6 +7,7 @@ namespace NeaMatrix\Connex\Login;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Session\Session;
 use NeaMatrix\Connex\Enums\DeviceType;
+use NeaMatrix\Connex\Login\Clients\AuthorizationRequest;
 
 /**
  * Server-side state of one login attempt, kept in the session so the browser
@@ -23,13 +24,32 @@ class LoginSession
     /**
      * Called when the login page opens. Remembers where the subscriber came from.
      */
-    public function begin(DeviceType $device, ?string $campaignId = null, ?string $trackingId = null): void
-    {
+    public function begin(
+        DeviceType $device,
+        ?AuthorizationRequest $authorization = null,
+        ?string $campaignId = null,
+        ?string $trackingId = null,
+    ): void {
         $this->session->put(self::KEY, [
             'device' => $device->value,
+            'authorization' => $authorization?->toArray(),
             'campaign_id' => $campaignId,
             'tracking_id' => $trackingId,
         ]);
+    }
+
+    /** The client that sent the subscriber here, or null for a session login. */
+    public function authorization(): ?AuthorizationRequest
+    {
+        $data = $this->session->get(self::KEY.'.authorization');
+
+        /** @var array{client: string, redirect_uri: string, state?: string|null, code_challenge?: string|null, response_mode?: string}|null $data */
+        return is_array($data) ? AuthorizationRequest::fromArray($data) : null;
+    }
+
+    public function hasStarted(): bool
+    {
+        return $this->session->has(self::KEY.'.device');
     }
 
     public function rememberTransaction(string $transactionId): void

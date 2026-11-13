@@ -142,3 +142,5 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
     .connex-spinner { animation: none; }
 }
+
+.connex-logo { display: block; height: 32px; width: auto; }

@@ -1,4 +1,4 @@
-@extends('connex::layouts.page')
+@extends(config('connex.pages.layout', 'connex::layouts.page'))
 
 @section('title', __('connex::account.title'))
 
@@ -61,5 +61,5 @@
 @endsection
 
 @push('connex-scripts')
-<script>{!! \NeaMatrix\Connex\Support\Assets::inline('js/connex-account.js') !!}</script>
+<script @if ($nonce = \NeaMatrix\Connex\Support\Assets::nonce()) nonce="{{ $nonce }}" @endif>{!! \NeaMatrix\Connex\Support\Assets::inline('js/connex-account.js') !!}</script>
 @endpush

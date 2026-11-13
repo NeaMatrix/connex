@@ -6,10 +6,10 @@ Publish the config with `php artisan vendor:publish --tag=connex-config`. Every 
 
 | Key | Env | Default | |
 | --- | --- | --- | --- |
-| `base_url` | `CONNEX_BASE_URL` | sandbox | Ebtekar gives you the production host |
+| `base_url` | `CONNEX_BASE_URL` | — (required) | Sandbox: `https://connextst.ebtekarcloud.com/external-api` |
 | `credentials.email` / `.password` | `CONNEX_EMAIL` / `CONNEX_PASSWORD` | — | Service account |
 | `http.timeout` / `.connect_timeout` | `CONNEX_TIMEOUT` / `CONNEX_CONNECT_TIMEOUT` | 15 / 5 s | |
-| `cache_store` | `CONNEX_CACHE_STORE` | default store | Holds the API token and the handoff codes. Use a shared store (Redis, database) when running more than one server. |
+| `cache_store` | `CONNEX_CACHE_STORE` | default store | Holds the API token, login codes and account tickets. Use a shared store (Redis, database) when running more than one server. |
 | `script_owner` | `CONNEX_DCB_SCRIPT_OWNER` | — | Your Evina account, only if you already integrate Evina directly (sent as `dcb_script_owner`) |
 | `timezone` | `CONNEX_TIMEZONE` | `Africa/Tripoli` | Connex dates have no offset. They are converted to your app timezone. |
 | `logging.channel` | `CONNEX_LOG_CHANNEL` | off | Logs every call. OTPs and passwords are never logged. |
@@ -39,24 +39,54 @@ Input such as `0920920110`, `920920110`, `+218 92 092 0110` and `00218920920110`
 
 To control how users are created, see [Login](login.md#how-users-are-created).
 
+## Clients and tokens
+
+See [Apps and frontends](clients.md).
+
+| Key | Default | |
+| --- | --- | --- |
+| `clients.{id}.redirect_uris` | — | Exact URIs the login may return to |
+| `clients.{id}.pkce` | `true` | Require a PKCE code_challenge |
+| `tokens.name` | `connex` | Tokens are named `{name}-{device}` |
+| `tokens.abilities` | `['*']` | Sanctum abilities |
+| `tokens.expires_in` | `null` | Minutes; `null` uses Sanctum's setting |
+| `tokens.code_ttl` | 120 s | Lifetime of a login code |
+
+## Login page
+
+| Key | Default | |
+| --- | --- | --- |
+| `login.enabled` | `true` | |
+| `login.prefix` | `connex` | URL prefix for every package route except webhooks |
+| `login.middleware` / `api_middleware` | `['web']` / `['api']` | |
+| `login.view` | `connex::login` | Your own view (see [Login page](login.md)) |
+| `login.require_terms` | `true` | Terms checkbox |
+| `login.allow_session_login` | `true` | Allow `/connex/login` without a client (same-domain session login) |
+| `login.guard` / `redirect_to` | `web` / `/` | For session logins |
+| `login.target_element` | `connex-submit` | id of the button the anti-fraud script watches |
+| `login.gateway_timeout_ms` | 15000 | Enable the button anyway if `gateway-load` never fires |
+| `login.resend_cooldown` | 60 s | Between OTP requests in one session |
+| `login.throttle.*` | see file | Per-minute limits per phone number, per user and per IP |
+
+## Account
+
+| Key | Default | |
+| --- | --- | --- |
+| `account.enabled` | `true` | Account page, subscription API and account tickets |
+| `account.middleware` | `['web', 'auth']` | Account page |
+| `account.api_middleware` | `['api', 'auth:sanctum']` | `/connex/api/subscription*` and `/connex/api/account-link` |
+| `account.guard` | `web` | Session guard an account ticket signs into |
+| `account.ticket_ttl` | 120 s | |
+| `account.view` / `logout_url` | `connex::account` / — | |
+
 ## Pages
 
 | Key | Default | |
 | --- | --- | --- |
-| `login.enabled` / `account.enabled` | `true` | Turn off the bundled routes |
-| `login.prefix` | `connex` | URL prefix for login, account and handoff |
-| `login.redirect_to` | `/` | Where web users go after login (an intended URL wins) |
-| `login.guard` | default | Session guard used for web logins |
-| `login.mobile_callback_url` | — | App deep link for webview logins |
-| `login.handoff_ttl` | 120 s | Lifetime of a handoff code |
-| `login.target_element` | `connex-submit` | id of the submit button the anti-fraud script watches |
-| `login.gateway_timeout_ms` | 15000 | Enable the button anyway if `gateway-load` never fires |
-| `login.resend_cooldown` | 60 s | Minimum time between two OTP requests in one session |
-| `login.throttle.*` | 20 / 5 / 10 | Requests per minute per IP for script / OTP / confirm |
-| `account.middleware` | `['web', 'auth']` | |
-| `account.logout_url` | — | Shows a logout button that POSTs here |
-| `pages.brand_name` / `brand_color` | `APP_NAME` / `#c8333b` | |
-| `pages.default_locale` | `ar` | |
+| `pages.brand_name` / `brand_color` / `logo_url` | `APP_NAME` / `#c8333b` / — | |
+| `pages.stylesheets` | `[]` | Extra CSS URLs loaded after the bundled CSS |
+| `pages.layout` | `connex::layouts.page` | Your own layout |
+| `pages.locales` / `default_locale` | `['ar', 'en']` / `ar` | |
 | `pages.*_url` | — | Header links: home, about, terms, privacy, contact |
 
 ## Storage and webhooks

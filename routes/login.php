@@ -9,6 +9,7 @@ use NeaMatrix\Connex\Login\Controllers\LoginPageController;
 
 Route::middleware(SetConnexLocale::class)->group(function (): void {
     Route::get('login', LoginPageController::class)->name('connex.login');
+    Route::get('login/cancel', [LoginController::class, 'cancel'])->name('connex.login.cancel');
 
     Route::get('login/script', [LoginController::class, 'script'])
         ->middleware('throttle:connex-script')

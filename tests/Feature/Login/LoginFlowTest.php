@@ -132,8 +132,8 @@ it('enforces the resend cooldown', function (): void {
     $connex->assertCalled('login', times: 2);
 });
 
-it('rate limits OTP guessing per IP', function (): void {
-    config(['connex.login.throttle.confirm' => 3]);
+it('rate limits OTP guessing per phone number', function (): void {
+    config(['connex.login.throttle.confirm_per_msisdn' => 3]);
     Connex::fake()->withOtp('4321');
     startLogin();
     $this->postJson('/connex/login/otp', ['msisdn' => '0920920110', 'accepted_terms' => true]);

@@ -11,11 +11,11 @@ return [
     |--------------------------------------------------------------------------
     | Connex API
     |--------------------------------------------------------------------------
-    | The sandbox is connextst.ebtekarcloud.com; Ebtekar gives you the
-    | production host and the service account (email + password).
+    | Sandbox: https://connextst.ebtekarcloud.com/external-api
+    | Ebtekar gives you the production host and the service account.
     */
 
-    'base_url' => env('CONNEX_BASE_URL', 'https://connextst.ebtekarcloud.com/external-api'),
+    'base_url' => env('CONNEX_BASE_URL'),
 
     'credentials' => [
         'email' => env('CONNEX_EMAIL'),
@@ -81,7 +81,45 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Login pages
+    | Clients
+    |--------------------------------------------------------------------------
+    | The apps that send subscribers to the login page and get a Sanctum token
+    | back. Each may only be redirected to its listed URIs (exact match).
+    |
+    | /connex/login?client=mobile&redirect_uri=tawajah://auth/connex&state=...
+    |              &code_challenge=...&code_challenge_method=S256&device=android
+    */
+
+    'clients' => [
+        // 'mobile' => [
+        //     'redirect_uris' => ['tawajah://auth/connex'],
+        //     'pkce' => true,
+        // ],
+        // 'web' => [
+        //     'redirect_uris' => ['https://app.example.com/auth/connex/callback'],
+        //     'pkce' => true,
+        // ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tokens
+    |--------------------------------------------------------------------------
+    | Issued by POST /connex/api/token in exchange for a login code.
+    */
+
+    'tokens' => [
+        'name' => 'connex',
+        'abilities' => ['*'],
+        /* Minutes; null keeps Sanctum's own expiration setting. */
+        'expires_in' => null,
+        /* Seconds a login code stays valid. */
+        'code_ttl' => 120,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Login page
     |--------------------------------------------------------------------------
     */
 
@@ -89,40 +127,56 @@ return [
         'enabled' => true,
         'prefix' => 'connex',
         'middleware' => ['web'],
-        'view' => 'connex::login',
-
-        /* Guard used to sign web visitors in. null uses the default guard. */
-        'guard' => null,
-        'redirect_to' => '/',
-
-        /* App deep link that receives ?code=... after a webview login, e.g. tawajah://connex. */
-        'mobile_callback_url' => env('CONNEX_MOBILE_CALLBACK_URL'),
-        'handoff_ttl' => 120,
         'api_middleware' => ['api'],
+        'view' => 'connex::login',
+        'require_terms' => true,
+
+        /*
+         * Without a ?client=, the page signs the visitor into this session guard
+         * and redirects to redirect_to: for apps whose frontend is on this domain.
+         * Set allow_session_login to false to require a client.
+         */
+        'allow_session_login' => true,
+        'guard' => 'web',
+        'redirect_to' => '/',
 
         /* id of the phone step's submit button, watched by the anti-fraud script. */
         'target_element' => 'connex-submit',
         'gateway_timeout_ms' => 15000,
         'resend_cooldown' => 60,
 
-        /* Requests per minute, per IP. */
+        /*
+         * Requests per minute. Libyan carriers put many subscribers behind one
+         * IP, so OTP and confirm limits are per phone number first.
+         */
         'throttle' => [
-            'script' => 20,
-            'otp' => 5,
-            'confirm' => 10,
+            'script_per_ip' => 60,
+            'otp_per_msisdn' => 3,
+            'otp_per_ip' => 60,
+            'confirm_per_msisdn' => 5,
+            'confirm_per_ip' => 120,
+            'token_per_ip' => 60,
         ],
     ],
 
     'account' => [
         'enabled' => true,
         'middleware' => ['web', 'auth'],
+        'api_middleware' => ['api', 'auth:sanctum'],
         'view' => 'connex::account',
+        /* Session guard the webview account ticket signs into. */
+        'guard' => 'web',
+        'ticket_ttl' => 120,
         'logout_url' => null,
     ],
 
     'pages' => [
         'brand_name' => env('APP_NAME', 'Connex'),
         'brand_color' => '#c8333b',
+        'logo_url' => null,
+        /* Extra stylesheets loaded after the bundled CSS, to restyle without publishing views. */
+        'stylesheets' => [],
+        'layout' => 'connex::layouts.page',
         'locales' => ['ar', 'en'],
         'default_locale' => 'ar',
         'home_url' => '/',

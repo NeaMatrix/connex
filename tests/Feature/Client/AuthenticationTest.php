@@ -55,7 +55,7 @@ it('refuses to call Connex without credentials', function (): void {
     Http::fake()->preventStrayRequests();
 
     app(ConnexClient::class)->subscriberDetails('0920920110');
-})->throws(AuthenticationFailed::class, 'CONNEX_EMAIL');
+})->throws(AuthenticationFailed::class, 'CONNEX_PASSWORD');
 
 it('wraps network failures', function (): void {
     Http::fake(fn () => throw new ConnectionException('cURL error 28: timed out'));

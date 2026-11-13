@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace NeaMatrix\Connex\Account\Controllers;
 
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use NeaMatrix\Connex\Exceptions\ConnexException;
 use NeaMatrix\Connex\Subscriptions\SubscriptionManager;
 use NeaMatrix\Connex\Subscriptions\SubscriptionStore;
@@ -23,7 +23,7 @@ class AccountController
         SubscriptionManager $manager,
         SubscriptionStore $store,
         MsisdnNormalizer $msisdns,
-    ): View {
+    ): Response {
         /** @var Model $user */
         $user = $request->user();
 
@@ -40,12 +40,12 @@ class AccountController
         /** @var view-string $view */
         $view = config('connex.account.view', 'connex::account');
 
-        return view($view, [
+        return response()->view($view, [
             'subscription' => $subscription,
             'msisdn' => $subscription ? $msisdns->normalize($subscription->msisdn)->national() : null,
             'notice' => $notice,
             'otpLength' => (int) config('connex.otp_length', 4),
             'logoutUrl' => config('connex.account.logout_url'),
-        ]);
+        ])->header('Cache-Control', 'no-store');
     }
 }

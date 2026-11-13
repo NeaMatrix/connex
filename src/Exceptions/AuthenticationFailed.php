@@ -12,6 +12,6 @@ class AuthenticationFailed extends ConnexException
 {
     public static function missingCredentials(): self
     {
-        return new self('Connex credentials are not configured. Set CONNEX_EMAIL and CONNEX_PASSWORD.');
+        return new self('Connex is not configured. Set CONNEX_BASE_URL, CONNEX_EMAIL and CONNEX_PASSWORD.');
     }
 }

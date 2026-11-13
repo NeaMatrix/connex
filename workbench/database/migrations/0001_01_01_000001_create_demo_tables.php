@@ -24,5 +24,6 @@ return new class extends Migration
         });
 
         (require __DIR__.'/../../../database/migrations/create_connex_tables.php.stub')->up();
+        (require __DIR__.'/../../../vendor/laravel/sanctum/database/migrations/2019_12_14_000001_create_personal_access_tokens_table.php')->up();
     }
 };

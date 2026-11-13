@@ -6,6 +6,7 @@ namespace NeaMatrix\Connex\Tests;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Laravel\Sanctum\SanctumServiceProvider;
 use NeaMatrix\Connex\ConnexServiceProvider;
 use NeaMatrix\Connex\Tests\Fixtures\User;
 use Orchestra\Testbench\TestCase as Orchestra;
@@ -19,7 +20,7 @@ abstract class TestCase extends Orchestra
      */
     protected function getPackageProviders($app): array
     {
-        return [ConnexServiceProvider::class];
+        return [SanctumServiceProvider::class, ConnexServiceProvider::class];
     }
 
     protected function defineEnvironment($app): void
@@ -34,7 +35,10 @@ abstract class TestCase extends Orchestra
             'connex.credentials.password' => 'service-password',
             'connex.user.model' => User::class,
             'connex.webhooks.secret' => 'webhook-secret',
-            'connex.login.mobile_callback_url' => 'myapp://connex',
+            'connex.clients' => [
+                'mobile' => ['redirect_uris' => ['myapp://auth/connex'], 'pkce' => true],
+                'web' => ['redirect_uris' => ['https://app.example.com/auth/callback'], 'pkce' => false],
+            ],
         ]);
     }
 
@@ -50,5 +54,6 @@ abstract class TestCase extends Orchestra
         });
 
         (require __DIR__.'/../database/migrations/create_connex_tables.php.stub')->up();
+        $this->loadMigrationsFrom(__DIR__.'/../vendor/laravel/sanctum/database/migrations');
     }
 }

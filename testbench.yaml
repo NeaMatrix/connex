@@ -3,6 +3,7 @@
 laravel: '@testbench'
 
 providers:
+  - Laravel\Sanctum\SanctumServiceProvider
   - NeaMatrix\Connex\ConnexServiceProvider
   - Workbench\App\Providers\WorkbenchServiceProvider
 
@@ -14,7 +15,7 @@ env:
   - CONNEX_WEBHOOK_SECRET=demo-secret
 
 workbench:
-  start: '/connex/login'
+  start: '/demo'
   install: true
   discovers:
     web: true

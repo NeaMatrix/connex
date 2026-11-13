@@ -16,7 +16,7 @@ class RequestOtpRequest extends FormRequest
     {
         return [
             'msisdn' => ['required', 'string', 'max:20', new ValidMsisdn],
-            'accepted_terms' => ['accepted'],
+            'accepted_terms' => config('connex.login.require_terms', true) ? ['accepted'] : ['nullable'],
         ];
     }
 

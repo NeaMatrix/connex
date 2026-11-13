@@ -46,7 +46,7 @@ The guide requires apps to show the login, OTP and profile pages as **webviews**
 | Phone and OTP landing page, Arabic option, terms/privacy/contact links | `/connex/login` with `?lang=ar\|en` |
 | Profile page with activate and cancel | `/connex/account` |
 | Content rules | `SubscriptionAccess`, the `connex.access` middleware and `HasConnexSubscription` |
-| Webview pages for apps | `/connex/login?device=android\|ios`, followed by the handoff code exchange |
+| Webview pages for apps | `/connex/login?client=…&device=android`, followed by code → Sanctum token, plus account tickets |
 | Notifications | `POST /connex/webhooks/{type}?token=…` |
 | All other endpoints | `Connex::` facade / `ConnexClient` |
 

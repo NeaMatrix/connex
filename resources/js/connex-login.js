@@ -34,6 +34,8 @@
             // Listen before injecting: the script may fire "gateway-load" synchronously.
             var ready = waitForGateway(Number(root.dataset.gatewayTimeout) || 15000);
             var tag = document.createElement('script');
+            var nonce = document.querySelector('meta[name="csp-nonce"]');
+            if (nonce) { tag.nonce = nonce.content; }
             tag.text = data.script;
             document.body.appendChild(tag);
             document.dispatchEvent(new Event('DCBProtectRun'));
@@ -60,9 +62,10 @@
 
     function requestOtp() {
         feedback.clear();
+        var terms = phoneForm.elements.accepted_terms;
         return Connex.request('POST', root.dataset.otpUrl, {
             msisdn: phoneForm.elements.msisdn.value,
-            accepted_terms: phoneForm.elements.accepted_terms.checked,
+            accepted_terms: terms ? terms.checked : undefined,
         }).then(function (data) {
             var template = data.awaits_sms_reply ? otpLabel.dataset.smsTemplate : otpLabel.dataset.template;
             otpLabel.textContent = template.replace(':msisdn', data.msisdn);
@@ -99,6 +102,22 @@
         });
     }
 
+    /**
+     * Popup logins (response_mode=web_message) hand the code to the opener
+     * window; everything else navigates to the redirect (app deep link,
+     * frontend callback, or this site).
+     */
+    function finish(data) {
+        var message = data.web_message;
+        if (message && window.opener && message.target_origin) {
+            window.opener.postMessage(message.data, message.target_origin);
+            window.close();
+        } else {
+            window.location.assign(data.redirect);
+        }
+        return new Promise(function () {});
+    }
+
     phoneForm.addEventListener('submit', function (event) {
         event.preventDefault();
         handle(submit, requestOtp);
@@ -107,10 +126,7 @@
     otpForm.addEventListener('submit', function (event) {
         event.preventDefault();
         handle(confirm, function () {
-            return Connex.request('POST', root.dataset.confirmUrl, { otp: otpInput.value }).then(function (data) {
-                window.location.assign(data.redirect);
-                return new Promise(function () {});
-            });
+            return Connex.request('POST', root.dataset.confirmUrl, { otp: otpInput.value }).then(finish);
         });
     });
 

@@ -41,7 +41,11 @@ Route::middleware(['auth', 'connex.access'])->group(function () {
 
 Blocked JSON requests get **402** with `{"access": "insufficient_balance", "message": "…"}`. Browsers are redirected to the account page, which explains why access is blocked.
 
-## Activating and cancelling from your own code
+## Activating and cancelling
+
+Apps and frontends use the JSON API under `/connex/api/subscription` (see [Apps and frontends](clients.md#the-account-page-connex-requirement)). From PHP:
+
+### From your own code
 
 ```php
 use NeaMatrix\Connex\Subscriptions\SubscriptionManager;

@@ -4,28 +4,29 @@ declare(strict_types=1);
 
 namespace NeaMatrix\Connex;
 
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Client\Factory as HttpFactory;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use NeaMatrix\Connex\Auth\DefaultLoginResponder;
 use NeaMatrix\Connex\Auth\EloquentUserResolver;
-use NeaMatrix\Connex\Auth\HandoffCodes;
+use NeaMatrix\Connex\Auth\OneTimeCodes;
 use NeaMatrix\Connex\Auth\SanctumTokenIssuer;
+use NeaMatrix\Connex\Auth\TokenResponseBuilder;
 use NeaMatrix\Connex\Client\AccessTokenProvider;
 use NeaMatrix\Connex\Client\ClientOptions;
 use NeaMatrix\Connex\Client\HttpConnexClient;
 use NeaMatrix\Connex\Client\ResponseParser;
 use NeaMatrix\Connex\Console\CheckConnectionCommand;
+use NeaMatrix\Connex\Contracts\BuildsTokenResponse;
 use NeaMatrix\Connex\Contracts\ConnexClient;
 use NeaMatrix\Connex\Contracts\IssuesTokens;
 use NeaMatrix\Connex\Contracts\LoginResponder;
 use NeaMatrix\Connex\Contracts\ResolvesUsers;
 use NeaMatrix\Connex\Http\Middleware\EnsureConnexAccess;
+use NeaMatrix\Connex\Http\RateLimits;
+use NeaMatrix\Connex\Login\Clients\ClientRegistry;
 use NeaMatrix\Connex\Login\LoginFlow;
 use NeaMatrix\Connex\Login\LoginSession;
 use NeaMatrix\Connex\Subscriptions\SubscriptionStore;
@@ -49,7 +50,7 @@ class ConnexServiceProvider extends ServiceProvider
 
         $this->app->make(Router::class)->aliasMiddleware('connex.access', EnsureConnexAccess::class);
 
-        $this->registerRateLimiters();
+        RateLimits::register();
         $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
@@ -85,6 +86,8 @@ class ConnexServiceProvider extends ServiceProvider
     private function registerLogin(): void
     {
         $this->app->bind(LoginSession::class, fn (Application $app): LoginSession => new LoginSession($app->make('session.store')));
+        $this->app->singleton(ClientRegistry::class, fn (): ClientRegistry => ClientRegistry::fromConfig((array) config('connex.clients', [])));
+        $this->app->bind(OneTimeCodes::class, fn (Application $app): OneTimeCodes => new OneTimeCodes($app->make('cache')->store(config('connex.cache_store'))));
 
         $this->app->bind(LoginFlow::class, fn (Application $app): LoginFlow => new LoginFlow(
             $app->make(ConnexClient::class),
@@ -92,12 +95,8 @@ class ConnexServiceProvider extends ServiceProvider
             $app->make(SubscriptionStore::class),
             $app->make(ResolvesUsers::class),
             $app->make('events'),
+            $app->make('db.connection'),
             (bool) config('connex.subscriptions.store', true),
-        ));
-
-        $this->app->singleton(HandoffCodes::class, fn (Application $app): HandoffCodes => new HandoffCodes(
-            $app->make('cache')->store(config('connex.cache_store')),
-            (int) config('connex.login.handoff_ttl', 120),
         ));
 
         $this->app->bindIf(ResolvesUsers::class, fn (): ResolvesUsers => new EloquentUserResolver(
@@ -109,22 +108,19 @@ class ConnexServiceProvider extends ServiceProvider
 
         $this->app->bindIf(LoginResponder::class, fn (Application $app): LoginResponder => new DefaultLoginResponder(
             $app->make('auth'),
-            $app->make(HandoffCodes::class),
+            $app->make(OneTimeCodes::class),
+            (int) config('connex.tokens.code_ttl', 120),
             config('connex.login.guard'),
             (string) config('connex.login.redirect_to', '/'),
-            config('connex.login.mobile_callback_url'),
         ));
 
-        $this->app->bindIf(IssuesTokens::class, SanctumTokenIssuer::class);
-    }
+        $this->app->bindIf(IssuesTokens::class, fn (): IssuesTokens => new SanctumTokenIssuer(
+            (string) config('connex.tokens.name', 'connex'),
+            array_values((array) config('connex.tokens.abilities', ['*'])),
+            is_numeric(config('connex.tokens.expires_in')) ? (int) config('connex.tokens.expires_in') : null,
+        ));
 
-    private function registerRateLimiters(): void
-    {
-        foreach (['script', 'otp', 'confirm'] as $step) {
-            RateLimiter::for("connex-{$step}", fn (Request $request): Limit => Limit::perMinute(
-                (int) config("connex.login.throttle.{$step}", 10),
-            )->by($step.'|'.$request->ip()));
-        }
+        $this->app->bindIf(BuildsTokenResponse::class, TokenResponseBuilder::class);
     }
 
     private function registerRoutes(): void
@@ -134,17 +130,19 @@ class ConnexServiceProvider extends ServiceProvider
         }
 
         $prefix = (string) config('connex.login.prefix', 'connex');
+        $group = fn (string $middlewareKey, array $default, string $file) => Route::prefix($prefix)
+            ->middleware(config($middlewareKey, $default))
+            ->group(__DIR__."/../routes/{$file}.php");
 
         if (config('connex.login.enabled')) {
-            Route::prefix($prefix)->middleware(config('connex.login.middleware', ['web']))
-                ->group(__DIR__.'/../routes/login.php');
-            Route::prefix($prefix)->middleware(config('connex.login.api_middleware', ['api']))
-                ->group(__DIR__.'/../routes/handoff.php');
+            $group('connex.login.middleware', ['web'], 'login');
+            $group('connex.login.api_middleware', ['api'], 'token');
         }
 
         if (config('connex.account.enabled')) {
-            Route::prefix($prefix)->middleware(config('connex.account.middleware', ['web', 'auth']))
-                ->group(__DIR__.'/../routes/account.php');
+            $group('connex.login.middleware', ['web'], 'account-enter');
+            $group('connex.account.middleware', ['web', 'auth'], 'account');
+            $group('connex.account.api_middleware', ['api', 'auth:sanctum'], 'account-api');
         }
 
         if (config('connex.webhooks.enabled')) {

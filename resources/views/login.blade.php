@@ -1,4 +1,4 @@
-@extends('connex::layouts.page')
+@extends(config('connex.pages.layout', 'connex::layouts.page'))
 
 @section('title', __('connex::login.title'))
 
@@ -25,18 +25,24 @@
         <input id="connex-msisdn" name="msisdn" class="connex-input" type="tel" inputmode="tel"
                autocomplete="tel-national" dir="ltr" placeholder="{{ __('connex::login.phone_placeholder') }}" required>
 
-        <label class="connex-check">
-            <input type="checkbox" name="accepted_terms" value="1" required>
-            <span>
-                @if (config('connex.pages.terms_url'))
-                    <a href="{{ config('connex.pages.terms_url') }}" target="_blank" rel="noopener">{{ __('connex::login.accept_terms') }}</a>
-                @else
-                    {{ __('connex::login.accept_terms') }}
-                @endif
-            </span>
-        </label>
+        @if ($requireTerms)
+            <label class="connex-check">
+                <input type="checkbox" name="accepted_terms" value="1" required>
+                <span>
+                    @if (config('connex.pages.terms_url'))
+                        <a href="{{ config('connex.pages.terms_url') }}" target="_blank" rel="noopener">{{ __('connex::login.accept_terms') }}</a>
+                    @else
+                        {{ __('connex::login.accept_terms') }}
+                    @endif
+                </span>
+            </label>
+        @endif
 
         <button id="{{ $targetElement }}" type="submit" class="connex-button" disabled>{{ __('connex::login.submit') }}</button>
+
+        @if ($canCancel)
+            <a href="{{ route('connex.login.cancel') }}" class="connex-link">{{ __('connex::login.cancel') }}</a>
+        @endif
     </form>
 
     <form data-step="otp" novalidate hidden>
@@ -57,5 +63,5 @@
 @endsection
 
 @push('connex-scripts')
-<script>{!! \NeaMatrix\Connex\Support\Assets::inline('js/connex-login.js') !!}</script>
+<script @if ($nonce = \NeaMatrix\Connex\Support\Assets::nonce()) nonce="{{ $nonce }}" @endif>{!! \NeaMatrix\Connex\Support\Assets::inline('js/connex-login.js') !!}</script>
 @endpush

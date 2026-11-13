@@ -18,4 +18,6 @@ return [
     'invalid_code' => 'This sign-in link has expired. Please sign in again.',
     'not_subscribed' => 'No subscription is linked to your account.',
     'terms_required' => 'Please accept the Terms and Conditions to continue.',
+    'invalid_link_title' => "This link can't be used",
+    'invalid_link' => 'Please go back to the app and try signing in again.',
 ];

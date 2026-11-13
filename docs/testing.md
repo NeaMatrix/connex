@@ -57,5 +57,5 @@ This checks the credentials and the anti-fraud endpoint, and optionally reads a 
 
 ```bash
 composer check   # Pint, PHPStan level 8, Pest
-composer demo    # click through the pages against the fake (code 1234)
+composer demo    # sample frontend: PKCE login → Sanctum token → protected API, against the fake (code 1234)
 ```

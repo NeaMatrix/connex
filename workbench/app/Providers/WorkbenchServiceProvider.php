@@ -32,8 +32,14 @@ class WorkbenchServiceProvider extends ServiceProvider
             return $fake;
         });
 
+        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'demo');
+
         config([
+            'connex.base_url' => 'https://connex.invalid/external-api',
             'connex.user.model' => User::class,
+            'connex.clients' => [
+                'demo' => ['redirect_uris' => ['http://127.0.0.1:8000/demo/callback', 'http://127.0.0.1:8765/demo/callback'], 'pkce' => true],
+            ],
             'connex.login.redirect_to' => '/connex/account',
             'connex.account.logout_url' => '/logout',
             'connex.pages.terms_url' => '/terms',

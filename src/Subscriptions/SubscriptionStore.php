@@ -43,7 +43,9 @@ class SubscriptionStore
      */
     public function record(Msisdn|string $msisdn, array $attributes): ConnexSubscription
     {
-        $subscription = $this->find($msisdn) ?? new (ConnexModels::subscription())(['msisdn' => (string) $msisdn]);
+        // createOrFirst survives two notifications for a new number arriving at once.
+        $subscription = $this->find($msisdn)
+            ?? ConnexModels::subscription()::query()->createOrFirst(['msisdn' => (string) $msisdn]);
 
         $subscription->fill(array_filter($attributes, static fn (mixed $value): bool => $value !== null));
         $subscription->synced_at = CarbonImmutable::now();
