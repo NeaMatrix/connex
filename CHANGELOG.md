@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (unreleased)
+## 1.0.0 (2026-11-13)
 
 - Connex API client covering every endpoint, with typed results and exceptions.
 - Anti-fraud OTP login pages (Arabic and English) that are brandable and replaceable per project.
