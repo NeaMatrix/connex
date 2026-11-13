@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1 (2026-11-13)
+
+- `connexAccess()` / `hasConnexAccess()` reuse an eager-loaded subscription and otherwise query, so they work in loops under `Model::preventLazyLoading()`.
+- The test suite now runs with lazy loading prevented.
+
 ## 1.0.0 (2026-11-13)
 
 - Connex API client covering every endpoint, with typed results and exceptions.

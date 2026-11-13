@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NeaMatrix\Connex\Tests;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\SanctumServiceProvider;
@@ -40,6 +41,14 @@ abstract class TestCase extends Orchestra
                 'web' => ['redirect_uris' => ['https://app.example.com/auth/callback'], 'pkce' => false],
             ],
         ]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Many apps enable this outside production; the package must work with it.
+        Model::preventLazyLoading();
     }
 
     protected function defineDatabaseMigrations(): void

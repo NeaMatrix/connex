@@ -13,6 +13,9 @@ use NeaMatrix\Connex\Support\ConnexModels;
 /**
  * Add to the user model to reach its Connex subscription.
  *
+ * Safe with Model::preventLazyLoading(): the helpers use the loaded relation
+ * when it is there and query otherwise.
+ *
  * @mixin Model
  */
 trait HasConnexSubscription
@@ -27,7 +30,11 @@ trait HasConnexSubscription
 
     public function connexAccess(): SubscriptionAccess
     {
-        return $this->connexSubscription?->access() ?? SubscriptionAccess::None;
+        $subscription = $this->relationLoaded('connexSubscription')
+            ? $this->getRelation('connexSubscription')
+            : $this->connexSubscription()->first();
+
+        return $subscription instanceof ConnexSubscription ? $subscription->access() : SubscriptionAccess::None;
     }
 
     public function hasConnexAccess(): bool
