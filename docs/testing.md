@@ -45,6 +45,17 @@ ConnexSubscription::factory()->active()->ownedBy($user)->create();
 // also: ->unpaid(), ->cancelled(), ->expired()
 ```
 
+## Fake mode for local and staging
+
+Without the Connex sandbox (or for frontend developers), set:
+
+```dotenv
+CONNEX_FAKE=true
+CONNEX_FAKE_OTP=1234
+```
+
+The whole package then runs against the in-memory Connex. Any Libyan mobile number signs in with the fake OTP, and existing subscriptions are read from `connex_subscriptions`. **Fake mode is ignored when `APP_ENV=production`.**
+
 ## Testing against the real sandbox
 
 ```bash

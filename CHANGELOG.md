@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0 (2026-11-13)
+
+- `login.require_access`: lapsed subscribers activate (OTP) or re-check their balance on the login page before a code is handed back.
+- Fake mode (`CONNEX_FAKE=true`): in-memory Connex seeded from stored subscriptions, for local and staging. Never active in production.
+
 ## 1.0.1 (2026-11-13)
 
 - `connexAccess()` / `hasConnexAccess()` reuse an eager-loaded subscription and otherwise query, so they work in loops under `Model::preventLazyLoading()`.

@@ -6,8 +6,8 @@ namespace NeaMatrix\Connex\Login\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use NeaMatrix\Connex\Contracts\LoginResponder;
 use NeaMatrix\Connex\Http\Responses\ErrorResponse;
+use NeaMatrix\Connex\Login\LoginCompleter;
 use NeaMatrix\Connex\Login\LoginFlow;
 use NeaMatrix\Connex\Login\LoginSession;
 use NeaMatrix\Connex\Login\Requests\ConfirmOtpRequest;
@@ -61,15 +61,13 @@ class LoginController
     }
 
     /** POST /connex/login/otp/confirm */
-    public function confirmOtp(ConfirmOtpRequest $request, LoginResponder $responder): JsonResponse
+    public function confirmOtp(ConfirmOtpRequest $request, LoginCompleter $completer): JsonResponse
     {
-        return $this->attempt(function () use ($request, $responder): JsonResponse {
-            $result = $this->flow->confirmOtp($this->session, $request->otp());
-            $redirect = $responder->respond($request, $result, $this->session);
-            $this->session->finish();
-
-            return new JsonResponse($redirect->toArray(), 200, ['Cache-Control' => 'no-store']);
-        });
+        return $this->attempt(fn (): JsonResponse => $completer->complete(
+            $request,
+            $this->flow->confirmOtp($this->session, $request->otp()),
+            $this->session,
+        ));
     }
 
     /** GET /connex/login/cancel: return to the client with error=access_denied. */

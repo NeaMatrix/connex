@@ -134,6 +134,15 @@ window.addEventListener('message', (event) => {
 
 `workbench/resources/views/frontend.blade.php` is a complete working example (PKCE, state check, redirect and popup). Run it with `composer demo`.
 
+## Requiring a subscription to sign in
+
+With `login.require_access` on, a number whose subscription grants no access doesn't get a code. It stays on the page in an **activation step**:
+
+- **Lapsed or cancelled-and-expired:** "Activate subscription" → Connex texts an OTP → the subscriber confirms → the login finishes.
+- **Active but expired** (the last renewal charge failed): the subscriber tops up their balance, then taps "I topped up, check again".
+
+The client only ever receives a code for a subscriber who has access. These steps are `POST /connex/login/activation`, `/connex/login/activation/confirm` and `/connex/login/access/check`, and the bundled page drives them.
+
 ## The account page (Connex requirement)
 
 Apps have the subscriber's token, not a browser session. To show the Connex account page in a webview:

@@ -100,6 +100,26 @@ class LoginSession
         return max($requestedAt + $cooldownSeconds - CarbonImmutable::now()->getTimestamp(), 0);
     }
 
+    /** A signed-in subscriber who still has to activate before the login is handed back. */
+    public function rememberPendingActivation(int|string $userId, bool $isNewSubscriber): void
+    {
+        $this->session->put(self::KEY.'.pending', ['user' => $userId, 'new' => $isNewSubscriber]);
+    }
+
+    /**
+     * @return array{user: int|string, new: bool}|null
+     */
+    public function pendingActivation(): ?array
+    {
+        $pending = $this->session->get(self::KEY.'.pending');
+
+        if (! is_array($pending) || ! isset($pending['user']) || (! is_int($pending['user']) && ! is_string($pending['user']))) {
+            return null;
+        }
+
+        return ['user' => $pending['user'], 'new' => (bool) ($pending['new'] ?? false)];
+    }
+
     public function finish(): void
     {
         $device = $this->device();

@@ -39,7 +39,7 @@ it('adds the app\'s CSP nonce to every inline tag', function (): void {
 
     $html = $this->get('/connex/login')->assertOk()->getContent();
 
-    expect(substr_count((string) $html, 'nonce="test-nonce"'))->toBe(3)
+    expect(substr_count((string) $html, 'nonce="test-nonce"'))->toBe(4)
         ->and($html)->toContain('<meta name="csp-nonce" content="test-nonce">');
 });
 

@@ -18,4 +18,8 @@ return [
     'change_number' => 'Change number',
     'retry' => 'Try again',
     'cancel' => 'Cancel',
+    'activation_title' => 'Activate your subscription',
+    'activate' => 'Activate subscription',
+    'check_again' => 'I topped up, check again',
+    'activation_otp_label' => 'Enter the activation code sent to your phone',
 ];

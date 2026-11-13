@@ -32,6 +32,9 @@ final class RateLimits
             Limit::perMinute(self::limit('confirm_per_ip', 120))->by('confirm-ip|'.$request->ip()),
         ]);
 
+        RateLimiter::for('connex-activation', fn (Request $request): Limit => Limit::perMinute(self::limit('otp_per_msisdn', 3))
+            ->by('activation|'.self::loginKey($request)));
+
         RateLimiter::for('connex-token', fn (Request $request): Limit => Limit::perMinute(self::limit('token_per_ip', 60))
             ->by('token|'.$request->ip()));
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use NeaMatrix\Connex\Http\Middleware\SetConnexLocale;
+use NeaMatrix\Connex\Login\Controllers\ActivationController;
 use NeaMatrix\Connex\Login\Controllers\LoginController;
 use NeaMatrix\Connex\Login\Controllers\LoginPageController;
 
@@ -22,4 +23,14 @@ Route::middleware(SetConnexLocale::class)->group(function (): void {
     Route::post('login/otp/confirm', [LoginController::class, 'confirmOtp'])
         ->middleware('throttle:connex-confirm')
         ->name('connex.login.confirm');
+
+    Route::post('login/activation', [ActivationController::class, 'request'])
+        ->middleware('throttle:connex-activation')
+        ->name('connex.login.activation');
+    Route::post('login/activation/confirm', [ActivationController::class, 'confirm'])
+        ->middleware('throttle:connex-confirm')
+        ->name('connex.login.activation.confirm');
+    Route::post('login/access/check', [ActivationController::class, 'check'])
+        ->middleware('throttle:connex-confirm')
+        ->name('connex.login.access.check');
 });

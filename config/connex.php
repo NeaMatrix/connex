@@ -38,6 +38,16 @@ return [
 
     'otp_length' => 4,
 
+    /*
+     * Local and staging only: replace Connex with an in-memory fake seeded from
+     * connex_subscriptions. Any number signs in with the fake OTP. Never active
+     * in production, whatever the setting.
+     */
+    'fake' => [
+        'enabled' => (bool) env('CONNEX_FAKE', false),
+        'otp' => env('CONNEX_FAKE_OTP', '1234'),
+    ],
+
     'msisdn' => [
         'country_code' => '218',
         'national_length' => 9,
@@ -130,6 +140,12 @@ return [
         'api_middleware' => ['api'],
         'view' => 'connex::login',
         'require_terms' => true,
+
+        /*
+         * Only hand back a login when the subscription grants access. A lapsed
+         * subscriber is asked to activate (OTP) on the same page first.
+         */
+        'require_access' => false,
 
         /*
          * Without a ?client=, the page signs the visitor into this session guard

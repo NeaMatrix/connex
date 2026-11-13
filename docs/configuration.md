@@ -13,6 +13,7 @@ Publish the config with `php artisan vendor:publish --tag=connex-config`. Every 
 | `script_owner` | `CONNEX_DCB_SCRIPT_OWNER` | — | Your Evina account, only if you already integrate Evina directly (sent as `dcb_script_owner`) |
 | `timezone` | `CONNEX_TIMEZONE` | `Africa/Tripoli` | Connex dates have no offset. They are converted to your app timezone. |
 | `logging.channel` | `CONNEX_LOG_CHANNEL` | off | Logs every call. OTPs and passwords are never logged. |
+| `fake.enabled` / `fake.otp` | `CONNEX_FAKE` / `CONNEX_FAKE_OTP` | off / `1234` | In-memory Connex for local and staging; never active in production |
 
 ## Phone numbers
 
@@ -61,6 +62,7 @@ See [Apps and frontends](clients.md).
 | `login.middleware` / `api_middleware` | `['web']` / `['api']` | |
 | `login.view` | `connex::login` | Your own view (see [Login page](login.md)) |
 | `login.require_terms` | `true` | Terms checkbox |
+| `login.require_access` | `false` | Ask lapsed subscribers to activate before handing back the login |
 | `login.allow_session_login` | `true` | Allow `/connex/login` without a client (same-domain session login) |
 | `login.guard` / `redirect_to` | `web` / `/` | For session logins |
 | `login.target_element` | `connex-submit` | id of the button the anti-fraud script watches |

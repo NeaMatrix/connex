@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeaMatrix\Connex\Testing;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Schema;
 use NeaMatrix\Connex\Contracts\ConnexClient;
 use NeaMatrix\Connex\Data\Charge;
 use NeaMatrix\Connex\Data\LoginConfirmation;
@@ -21,6 +22,7 @@ use NeaMatrix\Connex\Exceptions\FraudDetected;
 use NeaMatrix\Connex\Exceptions\InvalidOtp;
 use NeaMatrix\Connex\Exceptions\SubscriptionAlreadyActive;
 use NeaMatrix\Connex\Exceptions\SubscriptionAlreadyCancelled;
+use NeaMatrix\Connex\Support\ConnexModels;
 use NeaMatrix\Connex\Support\Msisdn;
 use NeaMatrix\Connex\Support\MsisdnNormalizer;
 
@@ -52,6 +54,26 @@ class FakeConnexClient implements ConnexClient
     public function __construct(
         private readonly MsisdnNormalizer $msisdns = new MsisdnNormalizer,
     ) {}
+
+    /**
+     * A fake that knows every subscription already stored locally, for fake
+     * mode (CONNEX_FAKE=true) where each request builds a new fake.
+     */
+    public static function seededFromDatabase(string $otp = '1234'): self
+    {
+        $fake = (new self(app(MsisdnNormalizer::class)))->withOtp($otp);
+
+        if (Schema::hasTable((new (ConnexModels::subscription()))->getTable())) {
+            foreach (ConnexModels::subscription()::query()->whereNotNull('status')->get() as $subscription) {
+                $fake->subscribers[$subscription->msisdn] = [
+                    'status' => $subscription->status ?? SubscriptionStatus::Active,
+                    'expires_at' => $subscription->expires_at ?? CarbonImmutable::now(),
+                ];
+            }
+        }
+
+        return $fake;
+    }
 
     public function withOtp(string $otp): static
     {

@@ -108,6 +108,11 @@
      * frontend callback, or this site).
      */
     function finish(data) {
+        if (data.step === 'activation' && window.ConnexActivation) {
+            clearInterval(countdown);
+            window.ConnexActivation.show(data, finish);
+            return null;
+        }
         var message = data.web_message;
         if (message && window.opener && message.target_origin) {
             window.opener.postMessage(message.data, message.target_origin);

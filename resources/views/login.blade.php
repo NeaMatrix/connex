@@ -9,6 +9,9 @@
     data-script-url="{{ route('connex.login.script') }}"
     data-otp-url="{{ route('connex.login.otp') }}"
     data-confirm-url="{{ route('connex.login.confirm') }}"
+    data-activation-url="{{ route('connex.login.activation') }}"
+    data-activation-confirm-url="{{ route('connex.login.activation.confirm') }}"
+    data-access-check-url="{{ route('connex.login.access.check') }}"
     data-gateway-timeout="{{ $gatewayTimeout }}"
     data-resend-template="{{ __('connex::login.resend_in', ['seconds' => ':seconds']) }}"
 >
@@ -59,9 +62,27 @@
         </p>
         <button type="button" class="connex-link" data-change-number>{{ __('connex::login.change_number') }}</button>
     </form>
+
+    <div data-step="activation" hidden>
+        <h1>{{ __('connex::login.activation_title') }}</h1>
+        <p class="connex-muted" data-access-message></p>
+        <button type="button" class="connex-button" data-activate>{{ __('connex::login.activate') }}</button>
+        <button type="button" class="connex-link" data-check-access>{{ __('connex::login.check_again') }}</button>
+
+        <form data-step="activation-otp" novalidate hidden>
+            <label for="connex-activation-otp">{{ __('connex::login.activation_otp_label') }}</label>
+            @include('connex::partials.otp-input', ['id' => 'connex-activation-otp', 'length' => $otpLength])
+            <button type="submit" class="connex-button">{{ __('connex::login.confirm') }}</button>
+        </form>
+
+        @if ($canCancel)
+            <a href="{{ route('connex.login.cancel') }}" class="connex-link">{{ __('connex::login.cancel') }}</a>
+        @endif
+    </div>
 </section>
 @endsection
 
 @push('connex-scripts')
+<script @if ($nonce = \NeaMatrix\Connex\Support\Assets::nonce()) nonce="{{ $nonce }}" @endif>{!! \NeaMatrix\Connex\Support\Assets::inline('js/connex-activation.js') !!}</script>
 <script @if ($nonce = \NeaMatrix\Connex\Support\Assets::nonce()) nonce="{{ $nonce }}" @endif>{!! \NeaMatrix\Connex\Support\Assets::inline('js/connex-login.js') !!}</script>
 @endpush

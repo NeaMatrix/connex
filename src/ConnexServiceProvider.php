@@ -27,10 +27,13 @@ use NeaMatrix\Connex\Contracts\ResolvesUsers;
 use NeaMatrix\Connex\Http\Middleware\EnsureConnexAccess;
 use NeaMatrix\Connex\Http\RateLimits;
 use NeaMatrix\Connex\Login\Clients\ClientRegistry;
+use NeaMatrix\Connex\Login\LoginCompleter;
 use NeaMatrix\Connex\Login\LoginFlow;
 use NeaMatrix\Connex\Login\LoginSession;
+use NeaMatrix\Connex\Subscriptions\SubscriptionManager;
 use NeaMatrix\Connex\Subscriptions\SubscriptionStore;
 use NeaMatrix\Connex\Support\MsisdnNormalizer;
+use NeaMatrix\Connex\Testing\FakeConnexClient;
 use NeaMatrix\Connex\Webhooks\WebhookProcessor;
 
 class ConnexServiceProvider extends ServiceProvider
@@ -74,6 +77,12 @@ class ConnexServiceProvider extends ServiceProvider
         ));
 
         $this->app->bind(ConnexClient::class, HttpConnexClient::class);
+
+        if ($this->usesFakeConnex()) {
+            $this->app->scoped(ConnexClient::class, fn (): FakeConnexClient => FakeConnexClient::seededFromDatabase(
+                (string) config('connex.fake.otp', '1234'),
+            ));
+        }
 
         $this->app->bind(WebhookProcessor::class, fn (Application $app): WebhookProcessor => new WebhookProcessor(
             $app->make(SubscriptionStore::class),
@@ -121,6 +130,12 @@ class ConnexServiceProvider extends ServiceProvider
         ));
 
         $this->app->bindIf(BuildsTokenResponse::class, TokenResponseBuilder::class);
+
+        $this->app->bind(LoginCompleter::class, fn (Application $app): LoginCompleter => new LoginCompleter(
+            $app->make(LoginResponder::class),
+            $app->make(SubscriptionManager::class),
+            (bool) config('connex.login.require_access', false),
+        ));
     }
 
     private function registerRoutes(): void
@@ -166,6 +181,12 @@ class ConnexServiceProvider extends ServiceProvider
             __DIR__.'/../resources/css' => resource_path('vendor/connex/css'),
             __DIR__.'/../resources/js' => resource_path('vendor/connex/js'),
         ], 'connex-assets');
+    }
+
+    /** Fake mode is for local and staging; production always talks to Connex. */
+    private function usesFakeConnex(): bool
+    {
+        return (bool) config('connex.fake.enabled', false) && ! $this->app->isProduction();
     }
 
     /**
