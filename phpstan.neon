@@ -1,0 +1,19 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 8
+    paths:
+        - src
+        - config
+        - routes
+        - database
+    ignoreErrors:
+        # The package's own config file is a real config file once merged into the app.
+        -
+            identifier: larastan.noEnvCallsOutsideOfConfig
+            path: config/connex.php
+        # Used by applications, not by the package itself.
+        -
+            identifier: trait.unused
+            path: src/Models/Concerns/HasConnexSubscription.php

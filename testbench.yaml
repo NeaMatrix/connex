@@ -1,0 +1,24 @@
+# Local demo: `composer demo` serves the bundled pages against an in-memory Connex.
+# Any 9-digit Libyan mobile number works; the OTP is 1234.
+laravel: '@testbench'
+
+providers:
+  - NeaMatrix\Connex\ConnexServiceProvider
+  - Workbench\App\Providers\WorkbenchServiceProvider
+
+migrations:
+  - workbench/database/migrations
+
+env:
+  - APP_NAME="Connex demo"
+  - CONNEX_WEBHOOK_SECRET=demo-secret
+
+workbench:
+  start: '/connex/login'
+  install: true
+  discovers:
+    web: true
+  build:
+    - create-sqlite-db
+    - db-wipe
+    - migrate-fresh
