@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 (2026-11-18)
+
+- `subscriberDetails()` returns `exists: false` for a number that never subscribed (Connex `messageCode 08`, HTTP 404, found on the real sandbox) instead of throwing.
+
 ## 1.2.0 (2026-11-18)
 
 - Plans, OTP-confirmed plan changes and payment history: `GET /connex/api/subscription/plans`, `POST …/plan-change` (+ `/confirm`), `GET …/transactions`, and the same under `/connex/account` for the account page.

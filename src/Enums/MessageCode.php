@@ -17,6 +17,9 @@ enum MessageCode: string
     case Failed = '01';
     case ActionRequired = '02';
     case TooManyRequests = '05';
+
+    /** subscriber-details for a number that never subscribed (HTTP 404). */
+    case SubscriberNotFound = '08';
     case AlreadyCancelled = '12';
     case InvalidProduct = '18';
     case InsufficientBalance = '21';

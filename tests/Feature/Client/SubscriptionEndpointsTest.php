@@ -105,3 +105,14 @@ it('changes plan and sends SMS templates', function (): void {
     expect($connex->cancelImmediately('0920920110')->status)->toBe(SubscriptionStatus::Cancelled);
     Http::assertSent(fn (Request $request): bool => str_ends_with($request->url(), '/upgrade-confirm') && $request['uuid'] === 'plan-uuid');
 });
+
+it('treats a number that never subscribed as not subscribed', function (): void {
+    // Real sandbox answer for an unknown number.
+    ConnexHttp::fake(['subscriber-details' => [['messageCode' => '08', 'failed' => ['message' => 'subscriber invalid']], 404]]);
+
+    $details = app(ConnexClient::class)->subscriberDetails('0920374535');
+
+    expect($details->exists)->toBeFalse()
+        ->and($details->status)->toBeNull()
+        ->and($details->msisdn)->toBe('218920374535');
+});

@@ -14,7 +14,9 @@ use NeaMatrix\Connex\Data\SubscriptionChange;
 use NeaMatrix\Connex\Data\SubscriptionPlan;
 use NeaMatrix\Connex\Enums\DeviceType;
 use NeaMatrix\Connex\Enums\Endpoint;
+use NeaMatrix\Connex\Enums\MessageCode;
 use NeaMatrix\Connex\Enums\SubscriptionStatus;
+use NeaMatrix\Connex\Exceptions\RequestRejected;
 use NeaMatrix\Connex\Support\Msisdn;
 use NeaMatrix\Connex\Support\MsisdnNormalizer;
 
@@ -71,9 +73,20 @@ class HttpConnexClient implements ConnexClient
 
     public function subscriberDetails(Msisdn|string $msisdn): SubscriberDetails
     {
-        return SubscriberDetails::fromPayload($this->transport->send(Endpoint::SubscriberDetails, [
-            'msisdn' => $this->number($msisdn),
-        ])->payload);
+        $number = $this->number($msisdn);
+
+        try {
+            return SubscriberDetails::fromPayload($this->transport->send(Endpoint::SubscriberDetails, [
+                'msisdn' => $number,
+            ])->payload);
+        } catch (RequestRejected $rejection) {
+            // A number that never subscribed is an answer, not an error.
+            if ($rejection->response?->code === MessageCode::SubscriberNotFound) {
+                return new SubscriberDetails($number, false, null, null);
+            }
+
+            throw $rejection;
+        }
     }
 
     public function transactions(Msisdn|string $msisdn): array
