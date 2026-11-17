@@ -177,7 +177,10 @@ class FakeConnexClient implements ConnexClient
     {
         $this->record(__FUNCTION__, ['number' => $this->number($msisdn)]);
 
-        return [new SubscriptionPlan('fake-plan', 'Daily', 24, 24, 1, 0.25)];
+        return [
+            new SubscriptionPlan('fake-daily', 'Daily', 24, 24, 1, 0.25),
+            new SubscriptionPlan('fake-weekly', 'Weekly', 168, 72, 2, 1.5),
+        ];
     }
 
     public function requestActivation(Msisdn|string $msisdn): OtpChallenge

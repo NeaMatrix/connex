@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0 (2026-11-18)
+
+- Plans, OTP-confirmed plan changes and payment history: `GET /connex/api/subscription/plans`, `POST …/plan-change` (+ `/confirm`), `GET …/transactions`, and the same under `/connex/account` for the account page.
+- The account page offers "Change package" when Connex lists more than one plan.
+- `SubscriptionManager::plans()`, `requestPlanChange()`, `confirmPlanChange()`, `transactions()`.
+
 ## 1.1.0 (2026-11-13)
 
 - `login.require_access`: lapsed subscribers activate (OTP) or re-check their balance on the login page before a code is handed back.

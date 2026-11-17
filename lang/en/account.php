@@ -22,4 +22,7 @@ return [
         'new' => 'Pending',
         'none' => 'Not subscribed',
     ],
+    'plan_changed' => 'Your package was changed.',
+    'change_plan' => 'Change package',
+    'choose_plan' => 'Choose a package',
 ];

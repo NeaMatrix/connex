@@ -144,3 +144,20 @@ a { color: inherit; }
 }
 
 .connex-logo { display: block; height: 32px; width: auto; }
+
+.connex-plans { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; }
+.connex-plans legend { margin-bottom: 8px; color: var(--connex-muted); }
+.connex-plan {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--connex-border);
+    border-radius: var(--connex-radius);
+    cursor: pointer;
+    text-align: start;
+}
+.connex-plan:has(input:checked) { border-color: var(--connex-brand); }
+.connex-plan input { accent-color: var(--connex-brand); }
+.connex-plan-name { flex: 1; }
+.connex-plan-cost { color: var(--connex-muted); font-variant-numeric: tabular-nums; }

@@ -58,6 +58,11 @@ $subscription = $manager->confirmCancellation($user, $otp);
 $manager->requestActivation($user);
 $manager->confirmActivation($user, $otp, DeviceType::Android);
 
+$manager->plans($user);                                   // list<SubscriptionPlan>
+$manager->requestPlanChange($user, $uuid);                // Connex texts an OTP
+$manager->confirmPlanChange($user, $otp, $uuid);
+$manager->transactions($user);                            // list<Charge>
+
 $manager->refresh($user);                                 // pull the latest state
 ```
 

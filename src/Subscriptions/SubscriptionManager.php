@@ -6,13 +6,15 @@ namespace NeaMatrix\Connex\Subscriptions;
 
 use Illuminate\Database\Eloquent\Model;
 use NeaMatrix\Connex\Contracts\ConnexClient;
+use NeaMatrix\Connex\Data\Charge;
 use NeaMatrix\Connex\Data\OtpChallenge;
+use NeaMatrix\Connex\Data\SubscriptionPlan;
 use NeaMatrix\Connex\Enums\DeviceType;
 use NeaMatrix\Connex\Exceptions\ConnexException;
 use NeaMatrix\Connex\Models\ConnexSubscription;
 
 /**
- * Activates, cancels and refreshes the subscription that belongs to a user,
+ * Activates, cancels, changes the plan of and refreshes the subscription that belongs to a user,
  * keeping the local mirror up to date after every change.
  */
 class SubscriptionManager
@@ -70,6 +72,51 @@ class SubscriptionManager
         $change = $this->connex->confirmCancellation($this->subscriptionOf($owner)->msisdn, $otp, $device);
 
         return $this->store->recordChange($change);
+    }
+
+    /**
+     * The packages Connex offers this subscriber.
+     *
+     * @return list<SubscriptionPlan>
+     *
+     * @throws ConnexException|NotSubscribed
+     */
+    public function plans(Model $owner): array
+    {
+        return $this->connex->plans($this->subscriptionOf($owner)->msisdn);
+    }
+
+    /**
+     * @throws ConnexException|NotSubscribed
+     */
+    public function requestPlanChange(Model $owner, string $planUuid): OtpChallenge
+    {
+        return $this->connex->requestPlanChange($this->subscriptionOf($owner)->msisdn, $planUuid);
+    }
+
+    /**
+     * Confirm the move to another package, then re-read the subscription from Connex.
+     *
+     * @throws ConnexException|NotSubscribed
+     */
+    public function confirmPlanChange(Model $owner, string $otp, string $planUuid, DeviceType $device = DeviceType::Web): ConnexSubscription
+    {
+        $subscription = $this->subscriptionOf($owner);
+        $this->connex->confirmPlanChange($subscription->msisdn, $otp, $planUuid, $device);
+
+        return $this->store->recordDetails($this->connex->subscriberDetails($subscription->msisdn));
+    }
+
+    /**
+     * Every charge Connex took for this subscriber, newest Connex order.
+     *
+     * @return list<Charge>
+     *
+     * @throws ConnexException|NotSubscribed
+     */
+    public function transactions(Model $owner): array
+    {
+        return $this->connex->transactions($this->subscriptionOf($owner)->msisdn);
     }
 
     private function subscriptionOf(Model $owner): ConnexSubscription

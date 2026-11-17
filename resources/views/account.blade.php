@@ -13,6 +13,8 @@
     data-activate-confirm-url="{{ route('connex.account.activation.confirm') }}"
     data-cancel-url="{{ route('connex.account.cancellation') }}"
     data-cancel-confirm-url="{{ route('connex.account.cancellation.confirm') }}"
+    data-plan-url="{{ route('connex.account.plan-change') }}"
+    data-plan-confirm-url="{{ route('connex.account.plan-change.confirm') }}"
 >
     <h1>{{ __('connex::account.title') }}</h1>
 
@@ -42,6 +44,26 @@
         @else
             <button type="button" class="connex-button" data-action="activate">{{ __('connex::account.activate') }}</button>
         @endif
+    @endif
+
+    @if (count($plans) > 1)
+        <button type="button" class="connex-link" data-toggle-plans>{{ __('connex::account.change_plan') }}</button>
+
+        <form data-step="plans" novalidate hidden>
+            <fieldset class="connex-plans">
+                <legend>{{ __('connex::account.choose_plan') }}</legend>
+                @foreach ($plans as $plan)
+                    <label class="connex-plan">
+                        <input type="radio" name="uuid" value="{{ $plan->uuid }}" @checked($plan->name === $subscription?->plan_name)>
+                        <span class="connex-plan-name">{{ $plan->name }}</span>
+                        @if ($plan->cost !== null)
+                            <span class="connex-plan-cost" dir="ltr">{{ rtrim(rtrim(number_format($plan->cost, 3), '0'), '.') }} LYD</span>
+                        @endif
+                    </label>
+                @endforeach
+            </fieldset>
+            <button type="submit" class="connex-button">{{ __('connex::account.change_plan') }}</button>
+        </form>
     @endif
 
     <form data-step="otp" novalidate hidden>

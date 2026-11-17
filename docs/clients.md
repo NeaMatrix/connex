@@ -165,6 +165,10 @@ Or build the screen natively with the JSON API, which requires a Sanctum token:
 | POST | `/connex/api/subscription/activation/confirm` | `otp`, `device` |
 | POST | `/connex/api/subscription/cancellation` | — |
 | POST | `/connex/api/subscription/cancellation/confirm` | `otp`, `device` |
+| GET | `/connex/api/subscription/plans` | — |
+| POST | `/connex/api/subscription/plan-change` | `uuid` |
+| POST | `/connex/api/subscription/plan-change/confirm` | `uuid`, `otp`, `device` |
+| GET | `/connex/api/subscription/transactions` | — |
 
 ## Same-domain session login
 
