@@ -15,7 +15,7 @@ class DebugRecorder
 {
     private const array SECRET_FIELDS = ['otp', 'password', 'otp_signature', 'access_token'];
 
-    /** @var list<array{endpoint: string, method: string, request: array<string, mixed>, status: int|null, response: mixed, error: string|null, at: string}> */
+    /** @var list<array{endpoint: string, method: string, url: string, request: array<string, mixed>, status: int|null, response: mixed, error: string|null, duration_ms: int|null, at: string}> */
     private array $exchanges = [];
 
     public function __construct(
@@ -30,8 +30,15 @@ class DebugRecorder
     /**
      * @param  array<string, mixed>  $request
      */
-    public function record(Endpoint $endpoint, array $request, ?int $status, ?string $body, ?string $error = null): void
-    {
+    public function record(
+        Endpoint $endpoint,
+        array $request,
+        ?int $status,
+        ?string $body,
+        ?string $error = null,
+        string $url = '',
+        ?float $startedAt = null,
+    ): void {
         if (! $this->enabled) {
             return;
         }
@@ -39,16 +46,18 @@ class DebugRecorder
         $this->exchanges[] = [
             'endpoint' => $endpoint->value,
             'method' => $endpoint->method(),
+            'url' => $url,
             'request' => $this->mask($request),
             'status' => $status,
             'response' => $body === null ? null : $this->readable($body),
             'error' => $error,
+            'duration_ms' => $startedAt === null ? null : (int) round((microtime(true) - $startedAt) * 1000),
             'at' => now()->format('H:i:s.v'),
         ];
     }
 
     /**
-     * @return list<array{endpoint: string, method: string, request: array<string, mixed>, status: int|null, response: mixed, error: string|null, at: string}>
+     * @return list<array{endpoint: string, method: string, url: string, request: array<string, mixed>, status: int|null, response: mixed, error: string|null, duration_ms: int|null, at: string}>
      */
     public function all(): array
     {

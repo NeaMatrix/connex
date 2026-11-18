@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.0 (2026-11-18)
+
+- Debug panel redesign: beside the page on wide screens, one card per page action, each Connex call with its full URL on Connex's server, method, HTTP status, `messageCode`, Connex's message, response time, and the raw request and reply (colour-coded).
+
 ## 1.4.1 (2026-11-18)
 
 - Debug panel: our own reply to the page no longer prints the whole anti-fraud script, just its size.

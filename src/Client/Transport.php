@@ -69,17 +69,20 @@ class Transport
             ->connectTimeout($this->options->connectTimeout)
             ->acceptJson();
 
+        $url = $this->options->baseUrl.$endpoint->path();
+        $startedAt = microtime(true);
+
         try {
             $response = $endpoint->method() === 'GET'
                 ? $request->get($endpoint->path(), $parameters)
                 : $request->asForm()->post($endpoint->path(), $parameters);
         } catch (ConnectionException $exception) {
-            $this->debug->record($endpoint, $parameters, null, null, $exception->getMessage());
+            $this->debug->record($endpoint, $parameters, null, null, $exception->getMessage(), $url, $startedAt);
 
             throw ConnectionFailed::during($endpoint, $exception);
         }
 
-        $this->debug->record($endpoint, $parameters, $response->status(), $response->body());
+        $this->debug->record($endpoint, $parameters, $response->status(), $response->body(), null, $url, $startedAt);
 
         return $response;
     }

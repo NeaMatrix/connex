@@ -37,6 +37,9 @@ it('returns the raw Connex exchanges with every secret hidden', function (): voi
         ->json('connex_debug');
     $login = collect($exchanges)->firstWhere('endpoint', 'login');
 
+    expect($login['url'])->toBe('https://connex.test/external-api/login')
+        ->and($login['method'])->toBe('POST')
+        ->and($login['duration_ms'])->toBeInt();
     expect($login['endpoint'])->toBe('login')
         ->and($login['status'])->toBe(429)
         ->and($login['request'])->toMatchArray(['msisdn' => '218920374535', 'transaction_identify' => 'tx-1'])

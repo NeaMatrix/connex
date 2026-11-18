@@ -61,6 +61,9 @@ class AccessTokenProvider
             throw AuthenticationFailed::missingCredentials();
         }
 
+        $url = $this->options->baseUrl.Endpoint::AuthLogin->path();
+        $startedAt = microtime(true);
+
         try {
             $response = $this->http
                 ->baseUrl($this->options->baseUrl)
@@ -73,12 +76,12 @@ class AccessTokenProvider
                     'password' => $this->options->password,
                 ]);
         } catch (ConnectionException $exception) {
-            $this->debug?->record(Endpoint::AuthLogin, ['email' => $this->options->email], null, null, $exception->getMessage());
+            $this->debug?->record(Endpoint::AuthLogin, ['email' => $this->options->email], null, null, $exception->getMessage(), $url, $startedAt);
 
             throw ConnectionFailed::during(Endpoint::AuthLogin, $exception);
         }
 
-        $this->debug?->record(Endpoint::AuthLogin, ['email' => $this->options->email, 'password' => '•'], $response->status(), $response->body());
+        $this->debug?->record(Endpoint::AuthLogin, ['email' => $this->options->email, 'password' => '•'], $response->status(), $response->body(), null, $url, $startedAt);
 
         $parsed = $this->parser->parse(Endpoint::AuthLogin, $response->status(), $response->body());
 
