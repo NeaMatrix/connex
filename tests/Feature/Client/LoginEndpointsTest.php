@@ -12,6 +12,7 @@ use NeaMatrix\Connex\Enums\SubscriptionStatus;
 use NeaMatrix\Connex\Exceptions\FraudDetected;
 use NeaMatrix\Connex\Exceptions\InsufficientBalance;
 use NeaMatrix\Connex\Exceptions\InvalidOtp;
+use NeaMatrix\Connex\Exceptions\RequestRejected;
 use NeaMatrix\Connex\Exceptions\TooManyRequests;
 use NeaMatrix\Connex\Tests\Fixtures\ConnexHttp;
 
@@ -110,3 +111,18 @@ it('rejects a wrong OTP and an empty balance', function (array $body, int $statu
     'wrong otp' => [['messageCode' => '01', 'failed' => ['message' => 'OTP incorrect']], 422, InvalidOtp::class],
     'no balance' => [['messageCode' => '21', 'failed' => ['message' => 'not enough balance']], 406, InsufficientBalance::class],
 ]);
+
+it('treats a login answered with 01 inside success as an OTP sent', function (): void {
+    // Ebtekar's own Tawajah landing page accepts this answer as "OTP sent".
+    ConnexHttp::fake(['login' => [['messageCode' => '01', 'success' => ['message' => 'OTP send success', 'msisdn' => '218920374535']], 200]]);
+
+    $challenge = app(ConnexClient::class)->login('0920374535', 'tx');
+
+    expect($challenge->message)->toBe('OTP send success');
+});
+
+it('still rejects a login answered with 01 inside failed', function (): void {
+    ConnexHttp::fake(['login' => [['messageCode' => '01', 'failed' => ['message' => 'rejected']], 422]]);
+
+    expect(fn () => app(ConnexClient::class)->login('0920374535', 'tx'))->toThrow(RequestRejected::class);
+});

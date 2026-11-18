@@ -23,10 +23,17 @@ final readonly class ConnexResponse
         public string $rawCode,
         public Payload $payload,
         public string $body,
+        public ?string $wrapper = null,
     ) {}
 
     public function isSuccessful(): bool
     {
+        // Connex also answers a login with "01" inside "success" when it sends the
+        // OTP (seen on Ebtekar's own Tawajah landing page, which treats it as sent).
+        if ($this->endpoint === Endpoint::Login && $this->code === MessageCode::Failed && $this->wrapper === 'success') {
+            return true;
+        }
+
         return $this->httpStatus < 400 && $this->code?->isSuccessful() === true;
     }
 

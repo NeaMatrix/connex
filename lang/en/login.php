@@ -22,4 +22,6 @@ return [
     'activate' => 'Activate subscription',
     'check_again' => 'I topped up, check again',
     'activation_otp_label' => 'Enter the activation code sent to your phone',
+    'terms_prefix' => 'By using the service you agree to the',
+    'terms_suffix' => 'of the service.',
 ];

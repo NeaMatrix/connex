@@ -41,7 +41,7 @@
             </label>
         @endif
 
-        <button id="{{ $targetElement }}" type="submit" class="connex-button" disabled>{{ __('connex::login.submit') }}</button>
+        <button id="{{ $targetElement }}" type="submit" class="connex-button cptpl_subscribe" disabled>{{ __('connex::login.submit') }}</button>
 
         @if ($canCancel)
             <a href="{{ route('connex.login.cancel') }}" class="connex-link">{{ __('connex::login.cancel') }}</a>
@@ -79,6 +79,8 @@
             <a href="{{ route('connex.login.cancel') }}" class="connex-link">{{ __('connex::login.cancel') }}</a>
         @endif
     </div>
+
+    @include('connex::partials.compliance')
 </section>
 @endsection
 

@@ -40,6 +40,7 @@ final readonly class ResponseParser
             rawCode: $rawCode,
             payload: new Payload($this->payloadOf($decoded), $this->timezone),
             body: $body,
+            wrapper: $this->wrapperOf($decoded),
         );
     }
 
@@ -58,6 +59,20 @@ final readonly class ResponseParser
         }
 
         return is_array($decoded) ? $decoded : null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $decoded
+     */
+    private function wrapperOf(array $decoded): ?string
+    {
+        foreach (self::PAYLOAD_KEYS as $key) {
+            if (isset($decoded[$key]) && is_array($decoded[$key])) {
+                return $key;
+            }
+        }
+
+        return null;
     }
 
     /**

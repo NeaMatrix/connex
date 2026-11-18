@@ -55,3 +55,20 @@ it('can drop the terms checkbox', function (): void {
 it('is never cached by browsers or proxies', function (): void {
     $this->get('/connex/login')->assertHeader('Cache-Control', 'no-store, private');
 });
+
+it('marks the page for Connex Compliance Protect', function (): void {
+    config([
+        'connex.pages.logo_url' => '/logo.svg',
+        'connex.pages.price' => ['ar' => ['الفترة المجانية يوم ومن ثم 0.5 دينار يومياً'], 'en' => ['One free day, then 0.5 LYD a day']],
+    ]);
+
+    $this->get('/connex/login?lang=ar')
+        ->assertSee('cptpl_logo', false)
+        ->assertSee('cptpl_service', false)
+        ->assertSee('cptpl_subscribe', false)
+        ->assertSee('class="connex-price pricepoint cptpl_price"', false)
+        ->assertSee('cptpl_terms', false)
+        ->assertSee('الفترة المجانية يوم ومن ثم 0.5 دينار يومياً');
+
+    $this->get('/connex/login?lang=en')->assertSee('One free day, then 0.5 LYD a day');
+});

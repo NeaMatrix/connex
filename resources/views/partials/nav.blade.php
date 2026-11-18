@@ -11,10 +11,9 @@
 <header class="connex-nav">
     <span class="connex-brand">
         @if (config('connex.pages.logo_url'))
-            <img src="{{ config('connex.pages.logo_url') }}" alt="{{ config('connex.pages.brand_name') }}" class="connex-logo">
-        @else
-            {{ config('connex.pages.brand_name') }}
+            <img src="{{ config('connex.pages.logo_url') }}" alt="{{ config('connex.pages.brand_name') }}" class="connex-logo cptpl_logo">
         @endif
+        <span class="cptpl_service">{{ config('connex.pages.brand_name') }}</span>
     </span>
     <nav>
         @foreach ($links as $key => $url)

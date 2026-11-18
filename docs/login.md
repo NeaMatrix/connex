@@ -9,6 +9,25 @@ Every project uses the same flow and logic. **What the page looks like is up to 
 
 Every error (wrong code, fraud, rate limit, insufficient balance, Connex down) is shown in the subscriber's language, `?lang=ar|en`.
 
+## Compliance Protect (required by Connex)
+
+Connex's anti-fraud script inspects the landing page. Keep these classes on any custom view:
+
+| Class | Element |
+| --- | --- |
+| `cptpl_logo` | the service logo `<img>` (use the logo registered with Ebtekar) |
+| `cptpl_service` | the service name |
+| `cptpl_subscribe` | the subscribe / submit button |
+| `cptpl_price` | the price text (`pages.price`) |
+| `cptpl_terms` | the terms sentence |
+
+```php
+'price' => [
+    'ar' => ['الفترة المجانية يوم ومن ثم 0.5 دينار يومياً لمستخدمي ليبيانا'],
+    'en' => ['One free day, then 0.5 LYD per day for Libyana users'],
+],
+```
+
 ## Branding without touching views
 
 ```php

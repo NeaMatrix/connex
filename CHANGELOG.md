@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 (2026-11-18)
+
+- Connex **Compliance Protect** markers on the bundled login page: `cptpl_logo`, `cptpl_service`, `cptpl_subscribe`, `cptpl_price`, `cptpl_terms`. The anti-fraud script looks for them; custom views should keep them.
+- `pages.price`: the price lines Connex requires under the form (per locale).
+- A `login` answered with `messageCode 01` inside `success` counts as "OTP sent", matching Ebtekar's own landing page.
+
 ## 1.2.1 (2026-11-18)
 
 - `subscriberDetails()` returns `exists: false` for a number that never subscribed (Connex `messageCode 08`, HTTP 404, found on the real sandbox) instead of throwing.

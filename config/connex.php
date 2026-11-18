@@ -192,6 +192,12 @@ return [
         'logo_url' => null,
         /* Extra stylesheets loaded after the bundled CSS, to restyle without publishing views. */
         'stylesheets' => [],
+
+        /*
+         * Required by Connex Compliance Protect: the price shown under the form.
+         * A list of lines, or ['ar' => [...], 'en' => [...]].
+         */
+        'price' => [],
         'layout' => 'connex::layouts.page',
         'locales' => ['ar', 'en'],
         'default_locale' => 'ar',
