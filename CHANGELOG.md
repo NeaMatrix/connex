@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1 (2026-11-18)
+
+- Debug panel: our own reply to the page no longer prints the whole anti-fraud script, just its size.
+
 ## 1.4.0 (2026-11-18)
 
 - Debug panel (`CONNEX_DEBUG=true`): the login and account pages show every raw request to Connex and its exact reply (HTTP status, `messageCode`, body). OTPs, passwords and tokens are hidden; the anti-fraud script is summarised.

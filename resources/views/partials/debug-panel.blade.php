@@ -67,6 +67,7 @@
 
             var page = Object.assign({}, detail.page);
             delete page.connex_debug;
+            if (typeof page.script === 'string') { page.script = '<anti-fraud script, ' + page.script.length + ' bytes>'; }
             var note = el('li');
             note.appendChild(el('div', 'cxd-head', '→ page got HTTP ' + detail.status + ' from ' + detail.url.replace(location.origin, '')));
             note.appendChild(block('our answer to the page', page));
