@@ -37,7 +37,7 @@ a { color: inherit; }
 .connex-nav nav a:hover { color: var(--connex-text); }
 .connex-brand { font-weight: 700; font-size: 18px; }
 
-.connex-main { display: flex; justify-content: center; padding: 32px 16px; }
+.connex-main { display: flex; flex-wrap: wrap; justify-content: center; padding: 32px 16px; }
 
 .connex-card {
     position: relative;

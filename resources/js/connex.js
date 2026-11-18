@@ -20,6 +20,11 @@
             body: body ? JSON.stringify(body) : undefined,
         }).then(function (response) {
             return response.json().catch(function () { return {}; }).then(function (data) {
+                if (data && data.connex_debug) {
+                    document.dispatchEvent(new CustomEvent('connex:debug', {
+                        detail: { url: url, status: response.status, page: data, exchanges: data.connex_debug },
+                    }));
+                }
                 if (response.ok) {
                     return data;
                 }

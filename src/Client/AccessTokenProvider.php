@@ -7,6 +7,7 @@ namespace NeaMatrix\Connex\Client;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
+use NeaMatrix\Connex\Debug\DebugRecorder;
 use NeaMatrix\Connex\Enums\Endpoint;
 use NeaMatrix\Connex\Exceptions\AuthenticationFailed;
 use NeaMatrix\Connex\Exceptions\ConnectionFailed;
@@ -26,6 +27,7 @@ class AccessTokenProvider
         private readonly Cache $cache,
         private readonly ResponseParser $parser,
         private readonly ClientOptions $options,
+        private readonly ?DebugRecorder $debug = null,
     ) {}
 
     /**
@@ -71,8 +73,12 @@ class AccessTokenProvider
                     'password' => $this->options->password,
                 ]);
         } catch (ConnectionException $exception) {
+            $this->debug?->record(Endpoint::AuthLogin, ['email' => $this->options->email], null, null, $exception->getMessage());
+
             throw ConnectionFailed::during(Endpoint::AuthLogin, $exception);
         }
+
+        $this->debug?->record(Endpoint::AuthLogin, ['email' => $this->options->email, 'password' => '•'], $response->status(), $response->body());
 
         $parsed = $this->parser->parse(Endpoint::AuthLogin, $response->status(), $response->body());
 

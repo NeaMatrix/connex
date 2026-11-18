@@ -8,6 +8,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\Response;
 use Illuminate\Log\LogManager;
+use NeaMatrix\Connex\Debug\DebugRecorder;
 use NeaMatrix\Connex\Enums\Endpoint;
 use NeaMatrix\Connex\Exceptions\ConnectionFailed;
 use NeaMatrix\Connex\Exceptions\ConnexException;
@@ -28,6 +29,7 @@ class Transport
         private readonly ResponseParser $parser,
         private readonly ClientOptions $options,
         private readonly LogManager $logs,
+        private readonly DebugRecorder $debug,
     ) {}
 
     /**
@@ -68,12 +70,18 @@ class Transport
             ->acceptJson();
 
         try {
-            return $endpoint->method() === 'GET'
+            $response = $endpoint->method() === 'GET'
                 ? $request->get($endpoint->path(), $parameters)
                 : $request->asForm()->post($endpoint->path(), $parameters);
         } catch (ConnectionException $exception) {
+            $this->debug->record($endpoint, $parameters, null, null, $exception->getMessage());
+
             throw ConnectionFailed::during($endpoint, $exception);
         }
+
+        $this->debug->record($endpoint, $parameters, $response->status(), $response->body());
+
+        return $response;
     }
 
     /**

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0 (2026-11-18)
+
+- Debug panel (`CONNEX_DEBUG=true`): the login and account pages show every raw request to Connex and its exact reply (HTTP status, `messageCode`, body). OTPs, passwords and tokens are hidden; the anti-fraud script is summarised.
+
 ## 1.3.0 (2026-11-18)
 
 - Connex **Compliance Protect** markers on the bundled login page: `cptpl_logo`, `cptpl_service`, `cptpl_subscribe`, `cptpl_price`, `cptpl_terms`. The anti-fraud script looks for them; custom views should keep them.

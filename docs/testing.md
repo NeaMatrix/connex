@@ -56,6 +56,14 @@ CONNEX_FAKE_OTP=1234
 
 The whole package then runs against the in-memory Connex. Any Libyan mobile number signs in with the fake OTP, and existing subscriptions are read from `connex_subscriptions`. **Fake mode is ignored when `APP_ENV=production`.**
 
+## Debug panel
+
+```dotenv
+CONNEX_DEBUG=true
+```
+
+The login and account pages then show a "Connex debug log" under the form: every request we sent to Connex, the HTTP status, the `messageCode` and the raw reply, plus what our server answered the page. OTPs, the service password and tokens are hidden. Turn it off when you're done.
+
 ## Testing against the real sandbox
 
 ```bash

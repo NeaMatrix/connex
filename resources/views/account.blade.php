@@ -80,6 +80,8 @@
         </form>
     @endif
 </section>
+
+@include('connex::partials.debug-panel')
 @endsection
 
 @push('connex-scripts')

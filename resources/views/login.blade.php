@@ -82,6 +82,8 @@
 
     @include('connex::partials.compliance')
 </section>
+
+@include('connex::partials.debug-panel')
 @endsection
 
 @push('connex-scripts')

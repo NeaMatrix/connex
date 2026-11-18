@@ -24,6 +24,8 @@ use NeaMatrix\Connex\Contracts\ConnexClient;
 use NeaMatrix\Connex\Contracts\IssuesTokens;
 use NeaMatrix\Connex\Contracts\LoginResponder;
 use NeaMatrix\Connex\Contracts\ResolvesUsers;
+use NeaMatrix\Connex\Debug\AttachConnexDebug;
+use NeaMatrix\Connex\Debug\DebugRecorder;
 use NeaMatrix\Connex\Http\Middleware\EnsureConnexAccess;
 use NeaMatrix\Connex\Http\RateLimits;
 use NeaMatrix\Connex\Login\Clients\ClientRegistry;
@@ -64,6 +66,7 @@ class ConnexServiceProvider extends ServiceProvider
 
     private function registerClient(): void
     {
+        $this->app->scoped(DebugRecorder::class, fn (): DebugRecorder => new DebugRecorder((bool) config('connex.debug.enabled', false)));
         $this->app->singleton(ClientOptions::class, fn (Application $app): ClientOptions => ClientOptions::fromConfig($this->config()));
         $this->app->singleton(MsisdnNormalizer::class, fn (): MsisdnNormalizer => MsisdnNormalizer::fromConfig($this->config()['msisdn'] ?? []));
         $this->app->singleton(ResponseParser::class, fn (): ResponseParser => new ResponseParser((string) config('connex.timezone')));
@@ -74,6 +77,7 @@ class ConnexServiceProvider extends ServiceProvider
             $app->make('cache')->store(config('connex.cache_store')),
             $app->make(ResponseParser::class),
             $app->make(ClientOptions::class),
+            $app->make(DebugRecorder::class),
         ));
 
         $this->app->bind(ConnexClient::class, HttpConnexClient::class);
@@ -146,7 +150,7 @@ class ConnexServiceProvider extends ServiceProvider
 
         $prefix = (string) config('connex.login.prefix', 'connex');
         $group = fn (string $middlewareKey, array $default, string $file) => Route::prefix($prefix)
-            ->middleware(config($middlewareKey, $default))
+            ->middleware([...(array) config($middlewareKey, $default), AttachConnexDebug::class])
             ->group(__DIR__."/../routes/{$file}.php");
 
         if (config('connex.login.enabled')) {

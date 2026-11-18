@@ -43,6 +43,14 @@ return [
      * connex_subscriptions. Any number signs in with the fake OTP. Never active
      * in production, whatever the setting.
      */
+    /*
+     * Debug panel: shows every raw request to Connex and its exact reply on the
+     * login and account pages. For testing only; OTPs, passwords and tokens are hidden.
+     */
+    'debug' => [
+        'enabled' => (bool) env('CONNEX_DEBUG', false),
+    ],
+
     'fake' => [
         'enabled' => (bool) env('CONNEX_FAKE', false),
         'otp' => env('CONNEX_FAKE_OTP', '1234'),
