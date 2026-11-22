@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.1 (2026-11-22)
+
+- `cptpl_template` falls back to `20230925` when a published config predates `pages.compliance_template`, instead of leaving the input out.
+
 ## 1.6.0 (2026-11-22)
 
 - Compliance Protect: the bundled layout now carries `<body class="cptpl_page">` and the hidden `cptpl_template` input. Without them Connex blocked `/login` as fraud (`messageCode 300`, `ft 8001`).

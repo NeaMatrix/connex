@@ -82,3 +82,9 @@ it('uses the configured Compliance Protect template and leaves it out when clear
     config(['connex.pages.compliance_template' => null]);
     $this->get('/connex/login')->assertDontSee('cptpl_template', false)->assertSee('<body class="cptpl_page">', false);
 });
+
+it('falls back to the default template when a published config lacks the key', function (): void {
+    config(['connex.pages' => array_diff_key(config('connex.pages'), ['compliance_template' => true])]);
+
+    $this->get('/connex/login')->assertSee('value="20230925" name="cptpl_template"', false);
+});
