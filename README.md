@@ -72,12 +72,15 @@ Check the connection:
 php artisan connex:check --msisdn=0920920110
 ```
 
+For the full walkthrough, see the [integration guide](docs/integration-guide.md).
+
 Clients open `/connex/login?client=…`. The subscriber's account page is at `/connex/account`.
 
 ## Documentation
 
 | Guide | What it covers |
 | --- | --- |
+| [Integration guide](docs/integration-guide.md) | Step by step into a Laravel project, go-live checklist, troubleshooting |
 | [How Connex works](docs/how-connex-works.md) | The platform, the flows, and how the package maps onto them |
 | [Configuration](docs/configuration.md) | Every config option |
 | [Apps and frontends](docs/clients.md) | Webview and frontend login, code → Sanctum token, account page in apps |

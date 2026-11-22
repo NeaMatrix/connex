@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.2 (2026-11-22)
+
+- Docs: [integration guide](docs/integration-guide.md), a step-by-step walkthrough into a Laravel project, with a go-live checklist and troubleshooting.
+
 ## 1.6.1 (2026-11-22)
 
 - `cptpl_template` falls back to `20230925` when a published config predates `pages.compliance_template`, instead of leaving the input out.
