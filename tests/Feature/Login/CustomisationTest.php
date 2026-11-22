@@ -63,6 +63,8 @@ it('marks the page for Connex Compliance Protect', function (): void {
     ]);
 
     $this->get('/connex/login?lang=ar')
+        ->assertSee('<body class="cptpl_page">', false)
+        ->assertSee('<input type="hidden" value="20230925" name="cptpl_template" class="cptpl_template">', false)
         ->assertSee('cptpl_logo', false)
         ->assertSee('cptpl_service', false)
         ->assertSee('cptpl_subscribe', false)
@@ -71,4 +73,12 @@ it('marks the page for Connex Compliance Protect', function (): void {
         ->assertSee('الفترة المجانية يوم ومن ثم 0.5 دينار يومياً');
 
     $this->get('/connex/login?lang=en')->assertSee('One free day, then 0.5 LYD a day');
+});
+
+it('uses the configured Compliance Protect template and leaves it out when cleared', function (): void {
+    config(['connex.pages.compliance_template' => '20240101']);
+    $this->get('/connex/login')->assertSee('value="20240101" name="cptpl_template"', false);
+
+    config(['connex.pages.compliance_template' => null]);
+    $this->get('/connex/login')->assertDontSee('cptpl_template', false)->assertSee('<body class="cptpl_page">', false);
 });

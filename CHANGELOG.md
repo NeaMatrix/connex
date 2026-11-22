@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.0 (2026-11-22)
+
+- Compliance Protect: the bundled layout now carries `<body class="cptpl_page">` and the hidden `cptpl_template` input. Without them Connex blocked `/login` as fraud (`messageCode 300`, `ft 8001`).
+- `pages.compliance_template` (`CONNEX_COMPLIANCE_TEMPLATE`, default `20230925`) and the `connex::partials.compliance-template` partial for custom layouts.
+
 ## 1.5.0 (2026-11-18)
 
 - Debug panel redesign: beside the page on wide screens, one card per page action, each Connex call with its full URL on Connex's server, method, HTTP status, `messageCode`, Connex's message, response time, and the raw request and reply (colour-coded).

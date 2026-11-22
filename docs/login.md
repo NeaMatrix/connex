@@ -11,10 +11,12 @@ Every error (wrong code, fraud, rate limit, insufficient balance, Connex down) i
 
 ## Compliance Protect (required by Connex)
 
-Connex's anti-fraud script inspects the landing page. Keep these classes on any custom view:
+Connex's anti-fraud script inspects the landing page. Keep these classes on any custom view. Missing ones get `/login` blocked as fraud (`messageCode 300`, `ft 8001`), even with everything else right:
 
 | Class | Element |
 | --- | --- |
+| `cptpl_page` | the `<body>` |
+| `cptpl_template` | a hidden input holding `pages.compliance_template` (default `20230925`); a custom layout adds it with `@include('connex::partials.compliance-template')` |
 | `cptpl_logo` | the service logo `<img>` (use the logo registered with Ebtekar) |
 | `cptpl_service` | the service name |
 | `cptpl_subscribe` | the subscribe / submit button |

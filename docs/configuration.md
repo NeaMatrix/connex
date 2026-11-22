@@ -87,6 +87,7 @@ See [Apps and frontends](clients.md).
 | --- | --- | --- |
 | `pages.brand_name` / `brand_color` / `logo_url` | `APP_NAME` / `#c8333b` / — | |
 | `pages.stylesheets` | `[]` | Extra CSS URLs loaded after the bundled CSS |
+| `pages.compliance_template` | `20230925` (`CONNEX_COMPLIANCE_TEMPLATE`) | Compliance Protect template id on every page; required by the anti-fraud script |
 | `pages.layout` | `connex::layouts.page` | Your own layout |
 | `pages.locales` / `default_locale` | `['ar', 'en']` / `ar` | |
 | `pages.*_url` | — | Header links: home, about, terms, privacy, contact |

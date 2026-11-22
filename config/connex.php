@@ -206,6 +206,11 @@ return [
          * A list of lines, or ['ar' => [...], 'en' => [...]].
          */
         'price' => [],
+        /*
+         * Required by Connex Compliance Protect: the cptpl_template id on the page.
+         * Without it the anti-fraud script blocks /login as fraud (messageCode 300, ft 8001).
+         */
+        'compliance_template' => env('CONNEX_COMPLIANCE_TEMPLATE', '20230925'),
         'layout' => 'connex::layouts.page',
         'locales' => ['ar', 'en'],
         'default_locale' => 'ar',

@@ -22,7 +22,8 @@
     @endforeach
     @stack('connex-head')
 </head>
-<body>
+<body class="cptpl_page">
+    @include('connex::partials.compliance-template')
     @include('connex::partials.nav')
 
     <main class="connex-main">
