@@ -23,7 +23,7 @@ it('asks a lapsed subscriber to activate before handing the login back', functio
     $connex = Connex::fake()->withSubscriber('0920920110', SubscriptionStatus::Cancelled, CarbonImmutable::now()->subDay());
 
     confirmAppLogin()
-        ->assertJson(['step' => 'activation', 'access' => 'expired'])
+        ->assertJson(['step' => 'activation', 'access' => 'canceled', 'action' => 'reactivate'])
         ->assertJsonMissingPath('redirect');
 
     $this->postJson('/connex/login/activation')->assertOk()->assertJson(['otp_sent' => true]);
@@ -39,7 +39,7 @@ it('asks a lapsed subscriber to activate before handing the login back', functio
 it('lets a subscriber whose renewal failed check again after topping up', function (): void {
     $connex = Connex::fake()->withSubscriber('0920920110', SubscriptionStatus::Active, CarbonImmutable::now()->subHour());
 
-    confirmAppLogin()->assertJson(['step' => 'activation', 'access' => 'insufficient_balance']);
+    confirmAppLogin()->assertJson(['step' => 'activation', 'access' => 'expired', 'action' => 'top_up']);
     $this->postJson('/connex/login/access/check')->assertJson(['step' => 'activation']);
 
     $connex->withSubscriber('0920920110', SubscriptionStatus::Active, CarbonImmutable::now()->addDay());

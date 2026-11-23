@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.0.0 (2026-11-23)
+
+**Breaking:** the access states are renamed to the Connex UX terms, and `expired` now means something else.
+
+| Old | New | Connex status | Expiry | Access | Button |
+| --- | --- | --- | --- | --- | --- |
+| `granted` | `active` | active | future | yes | none |
+| `grace_period` | `inactive` | cancelled | future | yes, with a notice | `reactivate` |
+| `expired` | `canceled` | cancelled | past | no (402) | `reactivate` |
+| `insufficient_balance` | `expired` | active | past | no (402) | `top_up` |
+| `none` | `none` | none / pending | | no (402) | `subscribe` |
+
+- Enum cases: `Granted` → `Active`, `GracePeriod` → `Inactive`, `Expired` → `Canceled`, `InsufficientBalance` → `Expired`.
+- New `SubscriptionAccess::message()` and `action()`. The subscription summary, the 402 reply of `connex.access` and the login activation step now include `message` and `action`.
+- New notice texts (en/ar) in `connex::access`. Republished translations must rename their keys.
+- The `insufficient_balance` **error code** from Connex OTP calls (messageCode 21) is unchanged.
+
 ## 1.6.2 (2026-11-22)
 
 - Docs: [integration guide](docs/integration-guide.md), a step-by-step walkthrough into a Laravel project, with a go-live checklist and troubleshooting.

@@ -72,7 +72,7 @@ it('exchanges the code for a working Sanctum token', function (): void {
             'token_type' => 'Bearer',
             'is_new_subscriber' => true,
             'user' => ['id' => User::query()->sole()->id],
-            'subscription' => ['msisdn' => '218920920110', 'status' => 'active', 'access' => 'granted', 'allows_access' => true],
+            'subscription' => ['msisdn' => '218920920110', 'status' => 'active', 'access' => 'active', 'allows_access' => true, 'message' => null, 'action' => null],
         ]);
 
     expect(PersonalAccessToken::query()->sole()->name)->toBe('connex-android');

@@ -12,7 +12,7 @@ use NeaMatrix\Connex\Models\ConnexSubscription;
 final class SubscriptionSummary
 {
     /**
-     * @return array{msisdn: string, status: string|null, plan: string|null, expires_at: string|null, access: string, allows_access: bool}|null
+     * @return array{msisdn: string, status: string|null, plan: string|null, expires_at: string|null, access: string, allows_access: bool, message: string|null, action: string|null}|null
      */
     public static function of(?ConnexSubscription $subscription): ?array
     {
@@ -29,6 +29,8 @@ final class SubscriptionSummary
             'expires_at' => $subscription->expires_at?->toIso8601String(),
             'access' => $access->value,
             'allows_access' => $access->allowsAccess(),
+            'message' => $access->message(),
+            'action' => $access->action(),
         ];
     }
 }

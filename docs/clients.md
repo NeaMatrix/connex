@@ -68,7 +68,8 @@ Content-Type: application/json
   "user": { "id": 1 },
   "subscription": {
     "msisdn": "218920920110", "status": "active", "plan": null,
-    "expires_at": "2026-11-14T00:13:57+00:00", "access": "granted", "allows_access": true
+    "expires_at": "2026-11-14T00:13:57+00:00", "access": "active", "allows_access": true,
+    "message": null, "action": null
   }
 }
 ```

@@ -27,7 +27,7 @@ it('returns the subscription, refreshed from Connex', function (): void {
 
     $this->withToken($token)->getJson('/connex/api/subscription')
         ->assertOk()
-        ->assertJson(['subscription' => ['status' => 'cancel', 'access' => 'grace_period', 'allows_access' => true]]);
+        ->assertJson(['subscription' => ['status' => 'cancel', 'access' => 'inactive', 'allows_access' => true, 'action' => 'reactivate']]);
 });
 
 it('cancels with an OTP over the API', function (): void {

@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 return [
-    'granted' => 'Your subscription is active.',
-    'insufficient_balance' => 'Your balance is insufficient.',
-    'grace_period' => 'Your subscription is cancelled. Activate it to keep access after it expires.',
-    'expired' => 'Please renew your subscription.',
+    'active' => 'Your subscription is active.',
+    'inactive' => 'Your service access will be decided soon. Reactivate to keep the service.',
+    'canceled' => 'Your subscription is canceled. Please reactivate it to use the app.',
+    'expired' => 'Please top up your phone balance to use the service.',
     'none' => 'Please subscribe to continue.',
 ];

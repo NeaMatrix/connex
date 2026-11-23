@@ -30,7 +30,7 @@
         otpForm.hidden = true;
         message.textContent = data.message;
         // An active subscription that failed to renew needs balance, not activation.
-        activate.hidden = data.access === 'insufficient_balance';
+        activate.hidden = data.access === 'expired';
     }
 
     function settle(data) {

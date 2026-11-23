@@ -23,13 +23,15 @@ ConnexSubscription::withAccess()->count();   // subscribers who may use paid con
 
 `SubscriptionAccess` applies the Connex rules:
 
-| Case | Value | `allowsAccess()` |
-| --- | --- | --- |
-| active, not expired | `Granted` | yes |
-| active, expired (renewal failed) | `InsufficientBalance` | no |
-| cancelled, not expired | `GracePeriod` | yes |
-| cancelled, expired | `Expired` | no |
-| never subscribed / pending | `None` | no |
+| Connex status | Expiry | Case | Value | `allowsAccess()` | `action()` |
+| --- | --- | --- | --- | --- | --- |
+| active | future | `Active` | `active` | yes | `null` |
+| cancelled | future | `Inactive` | `inactive` | yes | `reactivate` |
+| cancelled | past | `Canceled` | `canceled` | no | `reactivate` |
+| active | past (renewal failed) | `Expired` | `expired` | no | `top_up` |
+| never subscribed / pending | | `None` | `none` | no | `subscribe` |
+
+`message()` returns the notice for the subscriber (`connex::access.{value}`), or `null` when active.
 
 ## Protecting routes
 
@@ -39,7 +41,7 @@ Route::middleware(['auth', 'connex.access'])->group(function () {
 });
 ```
 
-Blocked JSON requests get **402** with `{"access": "insufficient_balance", "message": "…"}`. Browsers are redirected to the account page, which explains why access is blocked.
+Blocked JSON requests get **402** with `{"access": "expired", "message": "…", "action": "top_up"}`. Browsers are redirected to the account page, which explains why access is blocked.
 
 ## Activating and cancelling
 

@@ -25,15 +25,15 @@ it('lets paying and grace-period subscribers through', function (string $state):
     $this->actingAs(member($state))->get('/paid')->assertOk()->assertSee('paid content');
 })->with(['active', 'cancelled']);
 
-it('blocks everyone else with the Connex reason', function (?string $state, string $reason): void {
+it('blocks everyone else with the Connex reason', function (?string $state, string $reason, string $action): void {
     $this->actingAs(member($state))
         ->getJson('/paid')
         ->assertStatus(402)
-        ->assertJson(['access' => $reason]);
+        ->assertJson(['access' => $reason, 'action' => $action]);
 })->with([
-    'renewal failed' => ['unpaid', 'insufficient_balance'],
-    'expired' => ['expired', 'expired'],
-    'never subscribed' => [null, 'none'],
+    'renewal failed' => ['unpaid', 'expired', 'top_up'],
+    'cancelled and past expiry' => ['expired', 'canceled', 'reactivate'],
+    'never subscribed' => [null, 'none', 'subscribe'],
 ]);
 
 it('sends browsers to the account page', function (): void {

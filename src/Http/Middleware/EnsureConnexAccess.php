@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Blocks paid routes for users whose Connex subscription does not grant access.
  *
  * Route usage: ->middleware('connex.access')
- * JSON requests get HTTP 402 with an "access" reason; others are redirected to
+ * JSON requests get HTTP 402 with the "access" state, "message" and "action"; others are redirected to
  * the configured account page.
  */
 class EnsureConnexAccess
@@ -37,10 +37,10 @@ class EnsureConnexAccess
             return $next($request);
         }
 
-        $message = __("connex::access.{$access->value}");
+        $message = $access->message();
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => $message, 'access' => $access->value], 402);
+            return response()->json(['message' => $message, 'access' => $access->value, 'action' => $access->action()], 402);
         }
 
         $redirect = config('connex.account.enabled') ? route('connex.account') : '/';

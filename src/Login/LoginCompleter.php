@@ -39,7 +39,7 @@ class LoginCompleter
     }
 
     /**
-     * {"step": "activation", "access": "expired", "message": "..."}: the page shows
+     * {"step": "activation", "access": "canceled", "message": "...", "action": "reactivate"}: the page shows
      * the activate (or check balance) step.
      */
     public static function activationStep(SubscriptionAccess $access): JsonResponse
@@ -47,7 +47,8 @@ class LoginCompleter
         return new JsonResponse([
             'step' => 'activation',
             'access' => $access->value,
-            'message' => __("connex::access.{$access->value}"),
+            'message' => $access->message(),
+            'action' => $access->action(),
         ], 200, ['Cache-Control' => 'no-store']);
     }
 

@@ -38,7 +38,7 @@ class AccountController
         }
 
         $access = $request->session()->get('connex.access') ?? $subscription?->access()->value;
-        $notice = $access !== null && $access !== 'granted' ? __("connex::access.{$access}") : null;
+        $notice = $access !== null && $access !== 'active' ? __("connex::access.{$access}") : null;
 
         /** @var view-string $view */
         $view = config('connex.account.view', 'connex::account');
